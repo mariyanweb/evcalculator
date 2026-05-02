@@ -243,8 +243,8 @@
 
 /* Сгъваема секция */
 .vc-collapse{
-  margin-top:10px;
-  padding-top:10px;
+  margin-top:14px;
+  padding-top:12px;
   border-top:1px solid rgba(0,0,0,0.05);
 }
 .vc-collapse summary{
@@ -252,25 +252,60 @@
   font-size:11px;
   font-weight:600;
   color:var(--color-text-secondary);
-  padding:4px 0;
+  padding:6px 10px 6px 6px;
   list-style:none;
   user-select:none;
   text-transform:uppercase;
   letter-spacing:.05em;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  border-radius:999px;
+  transition:background-color .15s ease, color .15s ease;
 }
 .vc-collapse summary::-webkit-details-marker{display:none}
 .vc-collapse summary::before{
   content:'+';
-  font-size:14px;
-  display:inline-block;
-  width:14px;
-  font-weight:400;
-  transition:transform .2s ease;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:22px;
+  height:22px;
+  font-size:16px;
+  font-weight:600;
+  line-height:1;
+  border-radius:50%;
+  background:var(--color-background-primary);
+  color:var(--color-text-primary);
+  border:1px solid rgba(0,0,0,0.12);
+  box-shadow:0 1px 2px rgba(0,0,0,0.04);
+  transition:all .18s ease;
 }
 .vc-collapse[open] summary::before{
   content:'−';
 }
-.vc-collapse summary:hover{color:var(--color-text-primary)}
+/* Per-card accent for the toggle button — picks up card color when open */
+.vc-card.v1 .vc-collapse[open] summary::before{
+  background:#5B8FBE;
+  color:#fff;
+  border-color:#5B8FBE;
+}
+.vc-card.v2 .vc-collapse[open] summary::before{
+  background:#7BA85A;
+  color:#fff;
+  border-color:#7BA85A;
+}
+.vc-collapse summary:hover{
+  color:var(--color-text-primary);
+  background:rgba(0,0,0,0.03);
+}
+.vc-collapse summary:hover::before{
+  border-color:rgba(0,0,0,0.22);
+  box-shadow:0 1px 3px rgba(0,0,0,0.08);
+}
+.vc-collapse[open] summary:hover::before{
+  filter:brightness(0.95);
+}
 
 /* Глобални плъзгачи — мек лавандулов фон */
 .vc-globals{
@@ -829,7 +864,7 @@
           <span class="vc-unit">€${t('perYear')}</span>
         </div>
 
-        <details class="vc-collapse">
+        <details class="vc-collapse" open>
           <summary>${t('advanced')}</summary>
           <div class="vc-input-row">
             <label>${t('subsidy')}</label>
