@@ -654,32 +654,32 @@
   // hybridBaseFuel определя кое е "основното" гориво при хибрид: 'petrol' или 'diesel'
   const state = {
     v1: {
-      name: '',
-      type: 'ev',               // 'ice' или 'ev'
-      fuel: 'electric',
-      hybridBaseFuel: 'petrol',
-      purchase: 70000,
-      subsidy: 0,
-      consumption: 22,         // EV: 130 kWh/100км
-      secondaryConsumption: 0,
-      maintPerYear: 1500,
-      insurance: 2100,
-      roadTax: 90,
-      residualPct: 20
-    },
-    v2: {
-      name: '',
+	  name: '',
       type: 'ice',
       fuel: 'petrol',
       hybridBaseFuel: 'petrol',
       purchase: 60000,
       subsidy: 0,
-      consumption: 8,          // ICE дизел: 32 л/100км
+      consumption: 8,
       secondaryConsumption: 0,
       maintPerYear: 500,
       insurance: 1800,
       roadTax: 90,
       residualPct: 30
+    },
+    v2: {
+      name: '',
+      type: 'ev',
+      fuel: 'electric',
+      hybridBaseFuel: 'petrol',
+      purchase: 70000,
+      subsidy: 0,
+      consumption: 22,
+      secondaryConsumption: 0,
+      maintPerYear: 1500,
+      insurance: 2100,
+      roadTax: 90,
+      residualPct: 20
     },
     km: 2500,
     fuelPrice: 1.50,            // основна цена (дизел или бензин — според горивото на ПС)
