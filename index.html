@@ -1090,7 +1090,7 @@
         // Задаваме разумни стойности по подразбиране при смяна
         if (oldType !== cat || oldFuel !== fuel) {
           if (cat === 'ev') {
-            v.consumption = 130; // kWh/100км типично за камион; за кола ~18-22
+            v.consumption = 22; // 130 kWh/100км типично за камион; за кола ~18-22
             v.secondaryConsumption = 0;
           } else if (fuel === 'lpg') {
             v.consumption = 12;            // LPG л/100км (типично за лек автомобил)
@@ -1103,7 +1103,7 @@
             v.secondaryConsumption = 0;
           } else {
             // дизел / бензин
-            v.consumption = (oldType === 'ev') ? 32 : v.consumption;
+            v.consumption = (oldType === 'ev') ? 7 : v.consumption;
             v.secondaryConsumption = 0;
           }
         }
