@@ -189,7 +189,7 @@
   width:88px;
   text-align:right;
   background:var(--color-background-secondary);
-  border:1px solid transparent;
+  border:1px solid rgba(0,0,0,0.10);
   border-radius:10px;
   padding:5px 9px;
   font-size:13px;
@@ -197,14 +197,40 @@
   color:var(--color-text-primary);
   transition:all .15s ease;
 }
+/* Per-card accent borders: v1 blue, v2 green */
+.vc-card.v1 .vc-input-row input[type="number"]{
+  border-color:rgba(91,143,190,0.35);
+}
+.vc-card.v2 .vc-input-row input[type="number"]{
+  border-color:rgba(123,168,90,0.35);
+}
+.vc-card.v1 .vc-input-row input[type="number"]:hover{
+  background:var(--color-background-primary);
+  border-color:rgba(91,143,190,0.60);
+}
+.vc-card.v2 .vc-input-row input[type="number"]:hover{
+  background:var(--color-background-primary);
+  border-color:rgba(123,168,90,0.60);
+}
+.vc-card.v1 .vc-input-row input[type="number"]:focus{
+  outline:none;
+  background:var(--color-background-primary);
+  border-color:#5B8FBE;
+  box-shadow:0 0 0 3px rgba(91,143,190,0.18);
+}
+.vc-card.v2 .vc-input-row input[type="number"]:focus{
+  outline:none;
+  background:var(--color-background-primary);
+  border-color:#7BA85A;
+  box-shadow:0 0 0 3px rgba(123,168,90,0.18);
+}
+/* Fallback for inputs not inside a v1/v2 card (kept neutral) */
 .vc-input-row input[type="number"]:hover{
   background:var(--color-background-primary);
-  border-color:rgba(0,0,0,0.08);
 }
 .vc-input-row input[type="number"]:focus{
   outline:none;
   background:var(--color-background-primary);
-  border-color:rgba(0,0,0,0.18);
   box-shadow:0 0 0 3px rgba(91,143,190,0.12);
 }
 .vc-unit{
@@ -995,13 +1021,22 @@
     const labels = [];
     const series1 = [];
     const series2 = [];
-    for (let y = 0; y <= state.years; y++) {
-      labels.push(y === 0 ? t('start') : t('yearShort') + ' ' + y);
-      // Кумулативни нетни разходи: нетна покупка + операционни до година y + фиксирани до година y − остатъчна стойност (само в края)
-      const fracResidual1 = (y === state.years) ? d.c1.residualValue : 0;
-      const fracResidual2 = (y === state.years) ? d.c2.residualValue : 0;
-      series1.push(Math.round(d.c1.netPurchase + d.c1.opKm * d.kmYear * y + d.c1.fixedYearly * y - fracResidual1));
-      series2.push(Math.round(d.c2.netPurchase + d.c2.opKm * d.kmYear * y + d.c2.fixedYearly * y - fracResidual2));
+    const totalMonths = state.years * 12;
+    for (let m = 0; m <= totalMonths; m++) {
+      // Етикет само на годишните граници; иначе празен — скриваме го с tick callback
+      if (m === 0) {
+        labels.push(t('start'));
+      } else if (m % 12 === 0) {
+        labels.push(t('yearShort') + ' ' + (m / 12));
+      } else {
+        labels.push('');
+      }
+      // Кумулативни нетни разходи на месечна резолюция: нетна покупка + операционни до месец m + фиксирани до месец m − остатъчна стойност (само в последния месец, "клиф")
+      const yFrac = m / 12;
+      const fracResidual1 = (m === totalMonths) ? d.c1.residualValue : 0;
+      const fracResidual2 = (m === totalMonths) ? d.c2.residualValue : 0;
+      series1.push(Math.round(d.c1.netPurchase + d.c1.opKm * d.kmYear * yFrac + d.c1.fixedYearly * yFrac - fracResidual1));
+      series2.push(Math.round(d.c2.netPurchase + d.c2.opKm * d.kmYear * yFrac + d.c2.fixedYearly * yFrac - fracResidual2));
     }
     if (chart) chart.destroy();
     const ctx = document.getElementById('costChart');
@@ -1011,8 +1046,8 @@
       data: {
         labels,
         datasets: [
-          { label: state.v1.name, data: series1, borderColor: '#5B8FBE', backgroundColor: 'rgba(91,143,190,0.08)', tension:0.35, pointRadius:4, pointBackgroundColor:'#5B8FBE', pointBorderColor:'#fff', pointBorderWidth:1.5, borderDash:[], borderWidth:2.5 },
-          { label: state.v2.name, data: series2, borderColor: '#7BA85A', backgroundColor: 'rgba(123,168,90,0.08)', tension:0.35, pointRadius:4, pointBackgroundColor:'#7BA85A', pointBorderColor:'#fff', pointBorderWidth:1.5, borderDash:[6,3], borderWidth:2.5 }
+          { label: state.v1.name, data: series1, borderColor: '#5B8FBE', backgroundColor: 'rgba(91,143,190,0.08)', tension:0.25, pointRadius:2, pointHoverRadius:5, pointBackgroundColor:'#5B8FBE', pointBorderColor:'#fff', pointBorderWidth:1, borderDash:[], borderWidth:2.5 },
+          { label: state.v2.name, data: series2, borderColor: '#7BA85A', backgroundColor: 'rgba(123,168,90,0.08)', tension:0.25, pointRadius:2, pointHoverRadius:5, pointBackgroundColor:'#7BA85A', pointBorderColor:'#fff', pointBorderWidth:1, borderDash:[6,3], borderWidth:2.5 }
         ]
       },
       options: {
@@ -1020,11 +1055,36 @@
         maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
-          tooltip: { callbacks: { label: c => c.dataset.label + ': ' + Math.round(c.parsed.y).toLocaleString(locale()) + ' €' } }
+          tooltip: {
+            callbacks: {
+              title: items => {
+                const m = items[0].dataIndex;
+                if (m === 0) return t('start');
+                const yr = Math.floor(m / 12);
+                const mo = m % 12;
+                if (yr === 0) return mo + ' ' + t('moShort');
+                if (mo === 0) return yr + ' ' + t('yrShort');
+                return yr + ' ' + t('yrShort') + ' ' + mo + ' ' + t('moShort');
+              },
+              label: c => c.dataset.label + ': ' + Math.round(c.parsed.y).toLocaleString(locale()) + ' €'
+            }
+          }
         },
         scales: {
           y: { ticks: { callback: v => (v/1000).toFixed(0) + 'k €', font:{size:11} }, grid: { color: 'rgba(128,128,128,0.12)' } },
-          x: { ticks: { font:{size:11}, autoSkip:false, maxRotation:0 }, grid: { display:false } }
+          x: {
+            ticks: {
+              font:{size:11},
+              autoSkip:false,
+              maxRotation:0,
+              // Скриваме празните етикети — оставяме само годишните маркери
+              callback: function(value, index) {
+                const lbl = this.getLabelForValue(value);
+                return lbl === '' ? null : lbl;
+              }
+            },
+            grid: { display:false }
+          }
         }
       }
     });
