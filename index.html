@@ -1,21 +1,24 @@
-<h2 id="srTitle" style="font-family:Tahoma,Geneva,Verdana,sans-serif;text-align:center;font-size:20px;font-weight:600;color:var(--color-text-primary);margin:0 0 24px;letter-spacing:-.01em;max-width:920px;margin-left:auto;margin-right:auto">Universal financial comparison calculator for two vehicles</h2>
+<h2 id="srTitle" style="font-family:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;text-align:center;font-size:24px;font-weight:600;color:var(--color-text-primary);margin:0 0 24px;letter-spacing:.04em;text-transform:uppercase;max-width:920px;margin-left:auto;margin-right:auto">Universal Financial Comparison Calculator for Two Vehicles</h2>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap');
+
 .vc-wrap{
   padding:1rem 0;
-  font-family:Tahoma,Geneva,Verdana,sans-serif;
+  font-family:'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
   max-width:920px;
   margin:0 auto;
   color:var(--color-text-primary);
 }
 .vc-wrap input,.vc-wrap button,.vc-wrap select,.vc-wrap textarea{
-  font-family:Tahoma,Geneva,Verdana,sans-serif;
+  font-family:'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 .vc-wrap input[type="number"],
 .vc-wrap .vc-summary-val,
 .vc-wrap .vc-metric-val,
 .vc-wrap .vc-be-big,
 .vc-wrap .vc-sl-val{
+  font-family:'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   font-feature-settings:"tnum";
   font-variant-numeric:tabular-nums;
 }
@@ -82,33 +85,33 @@
   border:1px solid rgba(0,0,0,0.04);
 }
 .vc-card.v1{
-  background:linear-gradient(180deg, #F4F8FC 0%, var(--color-background-primary) 70%);
+  background:#EBF2F9;
   border-top:3px solid #5B8FBE;
 }
 .vc-card.v2{
-  background:linear-gradient(180deg, #F6FAEF 0%, var(--color-background-primary) 70%);
+  background:#EFF5E6;
   border-top:3px solid #7BA85A;
 }
 
 .vc-badge{
   display:inline-block;
-  font-size:10px;
+  font-size:14px;
   font-weight:700;
-  padding:4px 10px;
+  padding:6px 14px;
   border-radius:999px;
   margin-bottom:12px;
-  letter-spacing:.06em;
+  letter-spacing:.08em;
   text-transform:uppercase;
 }
-.vc-badge.v1{background:#EBF2F9;color:#3B6F9E}
-.vc-badge.v2{background:#EFF5E6;color:#52793A}
+.vc-badge.v1{background:#5B8FBE;color:#fff}
+.vc-badge.v2{background:#7BA85A;color:#fff}
 
 .vc-name-input{
   width:100%;
   background:transparent;
   border:none;
   border-bottom:1.5px solid transparent;
-  font-size:18px;
+  font-size:20px;
   font-weight:600;
   color:var(--color-text-primary);
   padding:4px 0 8px;
@@ -131,7 +134,7 @@
   border:1px solid transparent;
   border-radius:999px;
   padding:5px 11px;
-  font-size:11px;
+  font-size:12px;
   font-weight:500;
   cursor:pointer;
   color:var(--color-text-secondary);
@@ -155,7 +158,7 @@
   border:1px solid transparent;
   border-radius:999px;
   padding:5px 11px;
-  font-size:11px;
+  font-size:12px;
   font-weight:500;
   cursor:pointer;
   color:var(--color-text-secondary);
@@ -175,7 +178,7 @@
   justify-content:space-between;
   align-items:center;
   padding:7px 0;
-  font-size:13px;
+  font-size:14px;
   gap:10px;
 }
 .vc-input-row + .vc-input-row{
@@ -192,7 +195,7 @@
   border:1px solid rgba(0,0,0,0.10);
   border-radius:10px;
   padding:5px 9px;
-  font-size:13px;
+  font-size:14px;
   font-weight:600;
   color:var(--color-text-primary);
   transition:all .15s ease;
@@ -234,7 +237,7 @@
   box-shadow:0 0 0 3px rgba(91,143,190,0.12);
 }
 .vc-unit{
-  font-size:11px;
+  font-size:12px;
   color:var(--color-text-tertiary);
   width:78px;
   flex-shrink:0;
@@ -249,7 +252,7 @@
 }
 .vc-collapse summary{
   cursor:pointer;
-  font-size:11px;
+  font-size:12px;
   font-weight:600;
   color:var(--color-text-secondary);
   padding:6px 10px 6px 6px;
@@ -325,13 +328,13 @@
   border-top:1px solid rgba(0,0,0,0.04);
 }
 .vc-sl-lbl{
-  font-size:13px;
+  font-size:14px;
   color:var(--color-text-secondary);
   width:180px;
   flex-shrink:0;
 }
 .vc-sl-val{
-  font-size:13px;
+  font-size:14px;
   font-weight:600;
   color:var(--color-text-primary);
   min-width:96px;
@@ -399,19 +402,19 @@
 .vc-metric:nth-child(3){background:linear-gradient(135deg, #FAF1E8 0%, #FCF6EE 100%)}  /* праскова */
 .vc-metric:nth-child(4){background:linear-gradient(135deg, #F4ECF5 0%, #FAF4FA 100%)}  /* лавандула */
 .vc-metric-lbl{
-  font-size:11px;
+  font-size:12px;
   color:var(--color-text-secondary);
   margin-bottom:6px;
   line-height:1.35;
 }
 .vc-metric-val{
-  font-size:18px;
+  font-size:20px;
   font-weight:600;
   color:var(--color-text-primary);
   letter-spacing:-.01em;
 }
 .vc-metric-sub{
-  font-size:11px;
+  font-size:12px;
   color:var(--color-text-tertiary);
   margin-top:3px;
 }
@@ -430,7 +433,7 @@
   border:1px solid rgba(195,150,90,0.14);
 }
 .vc-be-lbl{
-  font-size:11px;
+  font-size:12px;
   color:var(--color-text-secondary);
   text-transform:uppercase;
   letter-spacing:.05em;
@@ -438,7 +441,7 @@
   margin-bottom:4px;
 }
 .vc-be-big{
-  font-size:24px;
+  font-size:26px;
   font-weight:600;
   color:var(--color-text-primary);
   letter-spacing:-.01em;
@@ -471,7 +474,7 @@
   justify-content:space-between;
   align-items:baseline;
   padding:7px 0;
-  font-size:13px;
+  font-size:14px;
 }
 .vc-summary-row + .vc-summary-row{
   border-top:1px solid rgba(0,0,0,0.05);
@@ -486,7 +489,7 @@
 .vc-winner{
   border-radius:16px;
   padding:14px 20px;
-  font-size:13px;
+  font-size:14px;
   display:flex;
   align-items:center;
   gap:12px;
@@ -828,7 +831,7 @@
       <div class="vc-card ${klass}">
         <span class="vc-badge ${klass}">${badge}</span>
         <input type="text" class="vc-name-input" data-veh="${which}" data-field="name" value="${escapeHtml(v.name)}" aria-label="${t('vehicles')}">
-        <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:6px">${t('pickFuel')}:</div>
+        <div style="font-size:12px;color:var(--color-text-tertiary);margin-bottom:6px">${t('pickFuel')}:</div>
         <div class="vc-ftype">${fuelTypeButtons(which)}</div>
 
         ${showHybridBase ? `
@@ -1135,7 +1138,7 @@
     document.getElementById('srTitle').textContent =
       lang === 'bg'
         ? 'Универсален финансов калкулатор за сравнение на две превозни средства'
-        : 'Universal financial comparison calculator for two vehicles';
+        : 'Universal Financial Comparison Calculator for Two Vehicles';
 
     document.getElementById('vehicleCards').innerHTML = vehicleCard('v1') + vehicleCard('v2');
     document.getElementById('globals').innerHTML = globalsHtml();
