@@ -1,4 +1,4 @@
-<h2 id="srTitle" style="font-family:Tahoma,Geneva,Verdana,sans-serif;text-align:center;font-size:20px;font-weight:600;color:var(--color-text-primary);margin:0 0 24px;letter-spacing:-.01em;max-width:920px;margin-left:auto;margin-right:auto">Универсален финансов калкулатор за сравнение на две превозни средства</h2>
+<h2 id="srTitle" style="font-family:Tahoma,Geneva,Verdana,sans-serif;text-align:center;font-size:20px;font-weight:600;color:var(--color-text-primary);margin:0 0 24px;letter-spacing:-.01em;max-width:920px;margin-left:auto;margin-right:auto">Universal financial comparison calculator for two vehicles</h2>
 
 <style>
 .vc-wrap{
@@ -541,19 +541,19 @@
 <div class="vc-wrap">
 
 <div class="vc-toolbar">
-  <p class="vc-section-lbl" id="lblVehicles">Превозни средства</p>
+  <p class="vc-section-lbl" id="lblVehicles">Vehicles</p>
   <div class="vc-lang" role="tablist" aria-label="Език / Language">
-    <button data-lang="bg" class="active" aria-pressed="true">БГ</button>
-    <button data-lang="en" aria-pressed="false">EN</button>
+    <button data-lang="bg" aria-pressed="false">БГ</button>
+    <button data-lang="en" class="active" aria-pressed="true">EN</button>
   </div>
 </div>
 
 <div class="vc-grid" id="vehicleCards"></div>
 
-<p class="vc-section-lbl" id="lblParams" style="margin-bottom:10px">Общи параметри</p>
+<p class="vc-section-lbl" id="lblParams" style="margin-bottom:10px">Common parameters</p>
 <div class="vc-globals" id="globals"></div>
 
-<p class="vc-section-lbl" id="lblResults" style="margin-bottom:10px">Резултати</p>
+<p class="vc-section-lbl" id="lblResults" style="margin-bottom:10px">Results</p>
 <div class="vc-metrics" id="metrics"></div>
 <div id="beArea"></div>
 
@@ -561,7 +561,7 @@
 
 <div class="vc-legend" id="legend"></div>
 <div class="vc-chart-wrap">
-  <canvas id="costChart" role="img" aria-label="Кумулативни общи разходи по години"></canvas>
+  <canvas id="costChart" role="img" aria-label="Cumulative net total costs over years"></canvas>
 </div>
 
 <div id="winnerArea"></div>
@@ -586,7 +586,7 @@
       maint:'Поддръжка', insurance:'Застраховка', roadTax:'Винетка / тол',
       residual:'Остатъчна стойност',
       kmMonth:'Километри / месец', fuelPrice:'Цена гориво', elPrice:'Цена ток', years:'Години на ползване',
-      kmUnit:'км', lUnit:'€/л', kgUnit:'€/кг', mwhUnit:'€/MWh', yrUnit:'год.',
+      kmUnit:'км', lUnit:'€/л', kgUnit:'€/кг', mwhUnit:'€/kWh', yrUnit:'год.',
       perKm:'/км', perMonth:'/мес.', perYear:'/год.', ofPrice:'% от цената',
       opCostMonth:'Оп. разход/мес.', saveMonth:'Спестяване/месец', diff:'Разлика за',
       inFavor1:'в полза на', inFavor2:'в полза на',
@@ -619,7 +619,7 @@
       maint:'Maintenance', insurance:'Insurance', roadTax:'Road toll / vignette',
       residual:'Residual value',
       kmMonth:'Kilometers / month', fuelPrice:'Fuel price', elPrice:'Electricity price', years:'Years of use',
-      kmUnit:'km', lUnit:'€/L', kgUnit:'€/kg', mwhUnit:'€/MWh', yrUnit:'yr',
+      kmUnit:'km', lUnit:'€/L', kgUnit:'€/kg', mwhUnit:'€/kWh', yrUnit:'yr',
       perKm:'/km', perMonth:'/mo', perYear:'/yr', ofPrice:'% of price',
       opCostMonth:'Op. cost/month', saveMonth:'Saving/month', diff:'Difference over',
       inFavor1:'in favor of', inFavor2:'in favor of',
@@ -640,7 +640,7 @@
     }
   };
 
-  let lang = 'bg';
+  let lang = 'en';
   const t = (k) => T[lang][k];
 
   // ============ СЪСТОЯНИЕ / STATE ============
@@ -685,7 +685,7 @@
     fuelPrice: 1.50,            // основна цена (дизел или бензин — според горивото на ПС)
     lpgPrice: 0.80,             // €/л LPG
     cngPrice: 1.20,              // €/кг CNG
-    elPrice: 40,                // €/MWh
+    elPrice: 0.40,              // €/kWh
     years: 5
   };
 
@@ -701,7 +701,7 @@
   function fuelCostPerKm(v) {
     if (v.type === 'ev') {
       // kWh/100км × €/kWh
-      const total = (v.consumption / 100) * (state.elPrice / 1000);
+      const total = (v.consumption / 100) * state.elPrice;
       return { primary: total, secondary: 0, total };
     }
     if (v.fuel === 'cng') {
@@ -717,7 +717,7 @@
     if (v.fuel === 'hybrid') {
       // бензин/дизел л/100км × €/л  +  ток kWh/100км × €/kWh
       const primary = (v.consumption / 100) * state.fuelPrice;
-      const secondary = (v.secondaryConsumption / 100) * (state.elPrice / 1000);
+      const secondary = (v.secondaryConsumption / 100) * state.elPrice;
       return { primary, secondary, total: primary + secondary };
     }
     // дизел / бензин
@@ -926,8 +926,8 @@
       ` : ''}
       <div class="vc-sl-row">
         <span class="vc-sl-lbl">${t('elPrice')}</span>
-        <input type="range" min="10" max="500" step="5" value="${state.elPrice}" data-global="elPrice">
-        <span class="vc-sl-val" id="ep-out">${Math.round(state.elPrice)} ${t('mwhUnit')}</span>
+        <input type="range" min="0.1" max="5" step="0.05" value="${state.elPrice}" data-global="elPrice">
+        <span class="vc-sl-val" id="ep-out">${state.elPrice.toFixed(2)} ${t('mwhUnit')}</span>
       </div>
       <div class="vc-sl-row">
         <span class="vc-sl-lbl">${t('years')}</span>
@@ -1237,7 +1237,7 @@
     const cngOut = document.getElementById('cng-out');
     if (kmOut) kmOut.textContent = fmtKm(state.km);
     if (fpOut) fpOut.textContent = state.fuelPrice.toFixed(2) + ' ' + t('lUnit');
-    if (epOut) epOut.textContent = Math.round(state.elPrice) + ' ' + t('mwhUnit');
+    if (epOut) epOut.textContent = state.elPrice.toFixed(2) + ' ' + t('mwhUnit');
     if (yrOut) yrOut.textContent = state.years + ' ' + t('yrUnit');
     if (lpgOut) lpgOut.textContent = state.lpgPrice.toFixed(2) + ' ' + t('lUnit');
     if (cngOut) cngOut.textContent = state.cngPrice.toFixed(2) + ' ' + t('kgUnit');
