@@ -539,15 +539,55 @@
   .vc-metrics{grid-template-columns:repeat(2,1fr)}
   .vc-sl-lbl{width:130px}
 }
+
+/* Share button */
+.vc-share-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:#fff;
+  border:1px solid rgba(0,0,0,0.10);
+  border-radius:999px;
+  padding:6px 14px;
+  font-size:12px;
+  font-weight:600;
+  color:#5D4F75;
+  cursor:pointer;
+  letter-spacing:.02em;
+  transition:all .18s ease;
+  font-family:inherit;
+}
+.vc-share-btn:hover{
+  background:#F6F2FA;
+  border-color:rgba(0,0,0,0.16);
+  box-shadow:0 1px 3px rgba(140,130,180,0.18);
+}
+.vc-share-btn:active{
+  transform:translateY(1px);
+}
+.vc-share-btn.copied{
+  background:#E8F5E2;
+  border-color:#7BA85A;
+  color:#3F6B22;
+}
+.vc-share-btn svg{
+  flex-shrink:0;
+}
 </style>
 
 <div class="vc-wrap">
 
 <div class="vc-toolbar">
   <p class="vc-section-lbl" id="lblVehicles">Vehicles</p>
-  <div class="vc-lang" role="tablist" aria-label="Език / Language">
-    <button data-lang="bg" aria-pressed="false">БГ</button>
-    <button data-lang="en" class="active" aria-pressed="true">EN</button>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <button type="button" class="vc-share-btn" id="shareBtn" aria-live="polite">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      <span id="shareBtnLbl">Share</span>
+    </button>
+    <div class="vc-lang" role="tablist" aria-label="Език / Language">
+      <button data-lang="bg" aria-pressed="false">БГ</button>
+      <button data-lang="en" class="active" aria-pressed="true">EN</button>
+    </div>
   </div>
 </div>
 
@@ -606,7 +646,8 @@
       advanced:'Допълнителни разходи', wins:'е по-изгодно',
       yrShort:'г.', moShort:'мес.', start:'Старт', yearShort:'Год.',
       ariaChart:'Кумулативни общи нетни разходи по години',
-      pickFuel:'Тип гориво'
+      pickFuel:'Тип гориво',
+      share:'Споделяне', shareCopied:'Копирано ✓'
     },
     en: {
       vehicles:'Vehicles', params:'Common parameters', results:'Results',
@@ -639,7 +680,8 @@
       advanced:'Additional costs', wins:'is more economical',
       yrShort:'y', moShort:'mo', start:'Start', yearShort:'Year',
       ariaChart:'Cumulative net total costs over years',
-      pickFuel:'Fuel type'
+      pickFuel:'Fuel type',
+      share:'Share', shareCopied:'Copied ✓'
     }
   };
 
@@ -1151,7 +1193,14 @@
     document.getElementById('winnerArea').innerHTML = winnerHtml(d);
     renderChart(d);
 
+    // Sync share button label to active language
+    const sbl = document.getElementById('shareBtnLbl');
+    if (sbl && !document.getElementById('shareBtn').classList.contains('copied')) {
+      sbl.textContent = t('share');
+    }
+
     attachInputHandlers();
+    scheduleUrlUpdate();
   }
 
   // ============ ОБРАБОТКА НА ВЪВЕЖДАНЕ / INPUT HANDLERS ============
@@ -1252,6 +1301,88 @@
     document.getElementById('legend').innerHTML = legendHtml();
     document.getElementById('winnerArea').innerHTML = winnerHtml(d);
     renderChart(d);
+    scheduleUrlUpdate();
+  }
+
+  // ============ URL СПОДЕЛЯНЕ / URL SHARING ============
+  // Кратки ключове за компактни URL адреси
+  // Short keys to keep URLs compact
+  const URL_KEYS = {
+    // per-vehicle fields → 2-letter suffix
+    name:'n', type:'t', fuel:'f', hybridBaseFuel:'hb',
+    purchase:'p', subsidy:'s', consumption:'c', secondaryConsumption:'sc',
+    maintPerYear:'m', insurance:'i', roadTax:'rt', residualPct:'r',
+    // globals
+    km:'km', fuelPrice:'fp', lpgPrice:'lp', cngPrice:'cp', elPrice:'ep', years:'y',
+    lang:'l'
+  };
+
+  function encodeStateToUrl() {
+    const params = new URLSearchParams();
+    const writeVeh = (prefix, v) => {
+      Object.keys(v).forEach(k => {
+        const short = URL_KEYS[k];
+        if (!short) return;
+        const val = v[k];
+        if (val === undefined || val === null || val === '') return;
+        params.set(prefix + short, String(val));
+      });
+    };
+    writeVeh('1', state.v1);
+    writeVeh('2', state.v2);
+    ['km','fuelPrice','lpgPrice','cngPrice','elPrice','years'].forEach(k => {
+      params.set(URL_KEYS[k], String(state[k]));
+    });
+    params.set(URL_KEYS.lang, lang);
+    const qs = params.toString();
+    const newUrl = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
+    try { history.replaceState(null, '', newUrl); } catch (_) { /* sandboxed iframes may block */ }
+  }
+
+  function decodeStateFromUrl() {
+    let params;
+    try { params = new URLSearchParams(window.location.search); }
+    catch (_) { return; }
+    if (!params || ![...params.keys()].length) return;
+
+    const numFields = new Set(['purchase','subsidy','consumption','secondaryConsumption',
+      'maintPerYear','insurance','roadTax','residualPct',
+      'km','fuelPrice','lpgPrice','cngPrice','elPrice','years']);
+
+    const readVeh = (prefix, v) => {
+      Object.keys(URL_KEYS).forEach(k => {
+        if (!(k in v)) return;
+        const short = URL_KEYS[k];
+        const raw = params.get(prefix + short);
+        if (raw === null) return;
+        if (numFields.has(k)) {
+          const n = parseFloat(raw);
+          if (!isNaN(n)) v[k] = n;
+        } else {
+          v[k] = raw;
+        }
+      });
+    };
+    readVeh('1', state.v1);
+    readVeh('2', state.v2);
+
+    ['km','fuelPrice','lpgPrice','cngPrice','elPrice','years'].forEach(k => {
+      const raw = params.get(URL_KEYS[k]);
+      if (raw === null) return;
+      const n = parseFloat(raw);
+      if (!isNaN(n)) state[k] = n;
+    });
+
+    const langRaw = params.get(URL_KEYS.lang);
+    if (langRaw === 'bg' || langRaw === 'en') lang = langRaw;
+  }
+
+  // Дебоунс — пишем URL не по-често от 1 път на 250мс
+  // Debounce — write URL at most every 250ms
+  let urlTimer = null;
+  function scheduleUrlUpdate() {
+    if (urlTimer) clearTimeout(urlTimer);
+    urlTimer = setTimeout(encodeStateToUrl, 250);
   }
 
   // ============ ПРЕВКЛЮЧВАТЕЛ НА ЕЗИК / LANGUAGE TOGGLE ============
@@ -1273,8 +1404,61 @@
   });
 
   // ============ ИНИЦИАЛИЗАЦИЯ / INIT ============
-  state.v1.name = t('v1Default');
-  state.v2.name = t('v2Default');
+  // Прочети състоянието от URL (ако има), след това попълни имена по подразбиране
+  // Read state from URL (if any), then fill default names
+  decodeStateFromUrl();
+
+  // Sync language toggle UI to decoded language
+  document.querySelectorAll('.vc-lang button').forEach(b => {
+    const act = b.dataset.lang === lang;
+    b.classList.toggle('active', act);
+    b.setAttribute('aria-pressed', act ? 'true' : 'false');
+  });
+
+  if (!state.v1.name) state.v1.name = t('v1Default');
+  if (!state.v2.name) state.v2.name = t('v2Default');
+
+  // Бутон за споделяне — копира текущия URL в клипборда
+  // Share button — copies current URL to clipboard
+  const shareBtn = document.getElementById('shareBtn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async () => {
+      // Принудително синхронизиране, в случай че има висящ дебоунс
+      if (urlTimer) { clearTimeout(urlTimer); urlTimer = null; }
+      encodeStateToUrl();
+      const url = window.location.href;
+      const lbl = document.getElementById('shareBtnLbl');
+      const showCopied = () => {
+        shareBtn.classList.add('copied');
+        if (lbl) lbl.textContent = t('shareCopied');
+        setTimeout(() => {
+          shareBtn.classList.remove('copied');
+          if (lbl) lbl.textContent = t('share');
+        }, 1800);
+      };
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(url);
+          showCopied();
+        } else {
+          // Резервен метод — стар подход през textarea
+          const ta = document.createElement('textarea');
+          ta.value = url;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          showCopied();
+        }
+      } catch (_) {
+        // Ако всичко друго се провали — покажи URL за ръчно копиране
+        window.prompt('Copy share link:', url);
+      }
+    });
+  }
+
   renderAll();
 })();
 </script>
