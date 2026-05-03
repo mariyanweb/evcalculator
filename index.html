@@ -1136,25 +1136,6 @@
     return g;
   }
 
-  // Намира точката на пресичане на двете серии (break-even) — линейна интерполация
-  // Finds where the two series intersect (break-even) — linear interpolation
-  function findBreakEvenIndex(s1, s2) {
-    let signPrev = Math.sign(s1[0] - s2[0]);
-    if (signPrev === 0) return 0;
-    for (let i = 1; i < s1.length; i++) {
-      const sign = Math.sign(s1[i] - s2[i]);
-      if (sign !== 0 && sign !== signPrev) {
-        // линейна интерполация между i-1 и i
-        const a = s1[i-1] - s2[i-1];
-        const b = s1[i] - s2[i];
-        const frac = a / (a - b);
-        return (i - 1) + frac;
-      }
-      if (sign !== 0) signPrev = sign;
-    }
-    return null;
-  }
-
   function renderChart(d) {
     const labels = [];
     const series1 = [];
@@ -1180,7 +1161,10 @@
     if (!canvas) return;
     const ctx2d = canvas.getContext('2d');
 
-    const beIdx = findBreakEvenIndex(series1, series2);
+    // Използваме каноничната стойност от calc() (същата като в карта break-even)
+    // Use the canonical value from calc() — same as the break-even card
+    const beMonths = (d.beMonths !== null && isFinite(d.beMonths)) ? d.beMonths : null;
+    const inRange = beMonths !== null && beMonths > 0 && beMonths < totalMonths;
 
     // Persistent (per-call) plugin: draws crosshair on hover and break-even marker
     const overlayPlugin = {
@@ -1190,8 +1174,8 @@
         if (!chartArea) return;
 
         // Break-even вертикална линия (ако се случва в диапазона)
-        if (beIdx != null && beIdx > 0 && beIdx < series1.length - 0.001) {
-          const xPx = scales.x.getPixelForValue(beIdx);
+        if (inRange) {
+          const xPx = scales.x.getPixelForValue(beMonths);
           ctx.save();
           ctx.strokeStyle = 'rgba(120,108,150,0.55)';
           ctx.setLineDash([4,4]);
@@ -1201,8 +1185,11 @@
           ctx.lineTo(xPx, chartArea.bottom);
           ctx.stroke();
 
-          // Точка на пресичане
-          const yVal = series1[Math.floor(beIdx)] + (series1[Math.ceil(beIdx)] - series1[Math.floor(beIdx)]) * (beIdx - Math.floor(beIdx));
+          // Точка на пресичане — интерполираме series1 при beMonths
+          // (series1 и series2 се пресичат тук аналитично)
+          const lo = Math.floor(beMonths), hi = Math.min(Math.ceil(beMonths), series1.length - 1);
+          const frac = beMonths - lo;
+          const yVal = series1[lo] + (series1[hi] - series1[lo]) * frac;
           const yPx = scales.y.getPixelForValue(yVal);
           ctx.setLineDash([]);
           ctx.fillStyle = '#fff';
@@ -1213,9 +1200,12 @@
           ctx.fill();
           ctx.stroke();
 
-          // Етикет "Break-even" над линията
-          const beYears = beIdx / 12;
-          const beLabel = (lang === 'bg' ? 'Изравняване' : 'Break-even') + ' · ' + beYears.toFixed(1) + ' ' + t('yrShort');
+          // Етикет "Break-even · Y yr M mo" — същият формат като карта
+          // Label "Break-even · Y yr M mo" — same format as card
+          const bY = Math.floor(beMonths / 12);
+          const bM = Math.round(beMonths % 12);
+          const yrPart = bY > 0 ? (bY + ' ' + t('yrShort') + ' ') : '';
+          const beLabel = (lang === 'bg' ? 'Изравняване' : 'Break-even') + ' · ' + yrPart + bM + ' ' + t('moShort');
           ctx.font = '600 11px Barlow, system-ui, sans-serif';
           const textW = ctx.measureText(beLabel).width;
           // Поставяме етикета така, че да не излиза извън графиката
