@@ -108,20 +108,43 @@
 
 .vc-name-input{
   width:100%;
-  background:transparent;
-  border:none;
-  border-bottom:1.5px solid transparent;
+  background:rgba(255,255,255,0.45);
+  border:1px solid rgba(0,0,0,0.10);
+  border-radius:10px;
   font-size:20px;
   font-weight:600;
   color:var(--color-text-primary);
-  padding:4px 0 8px;
+  padding:8px 12px;
   font-family:inherit;
   outline:none;
   margin-bottom:14px;
-  transition:border-color .15s ease;
+  transition:all .15s ease;
 }
-.vc-name-input:hover{border-bottom-color:rgba(0,0,0,0.08)}
-.vc-name-input:focus{border-bottom-color:var(--color-text-secondary)}
+.vc-name-input:hover{
+  background:rgba(255,255,255,0.75);
+}
+.vc-card.v1 .vc-name-input{
+  border-color:rgba(91,143,190,0.35);
+}
+.vc-card.v2 .vc-name-input{
+  border-color:rgba(123,168,90,0.35);
+}
+.vc-card.v1 .vc-name-input:hover{
+  border-color:rgba(91,143,190,0.60);
+}
+.vc-card.v2 .vc-name-input:hover{
+  border-color:rgba(123,168,90,0.60);
+}
+.vc-card.v1 .vc-name-input:focus{
+  background:#fff;
+  border-color:#5B8FBE;
+  box-shadow:0 0 0 3px rgba(91,143,190,0.18);
+}
+.vc-card.v2 .vc-name-input:focus{
+  background:#fff;
+  border-color:#7BA85A;
+  box-shadow:0 0 0 3px rgba(123,168,90,0.18);
+}
 
 .vc-ftype{
   display:flex;
