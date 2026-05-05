@@ -643,13 +643,14 @@
       vehicles:'Превозни средства', params:'Общи параметри', results:'Резултати',
       v1Default:'Превозно средство 1', v2Default:'Превозно средство 2',
       ice:'ДВГ', ev:'Електрическо',
-      diesel:'Дизел', petrol:'Бензин', cng:'CNG', lpg:'LPG', hybrid:'Хибрид', electric:'Електро',
+      diesel:'Дизел', petrol:'Бензин', cng:'CNG', lpg:'LPG', hybrid:'Хибрид', electric:'Електро', dieseladblue:'Дизел+AdBlue',
       purchasePrice:'Покупна цена', subsidy:'Субсидия / отстъпка',
       consIce:'Разход (л/100км)', consCng:'Разход (кг/100км)', consEv:'Разход (kWh/100км)',
       consLpg:'Разход LPG (л/100км)', consLpgSecondary:'Разход бензин (л/100км)',
       consHybridFuel:'Разход гориво (л/100км)', consHybridSecondary:'Разход ток (kWh/100км)',
+      consAdblueSecondary:'Разход AdBlue (л/1000км)',
       hybridBaseFuel:'Гориво на хибрида',
-      lpgPrice:'Цена LPG', cngPrice:'Цена CNG',
+      lpgPrice:'Цена LPG', cngPrice:'Цена CNG', adbluePrice:'Цена AdBlue',
       maint:'Поддръжка', insurance:'Застраховка', roadTax:'Винетка / тол',
       residual:'Остатъчна стойност',
       kmMonth:'Километри / месец', fuelPrice:'Цена гориво', elPrice:'Цена ток', years:'Години на ползване',
@@ -677,13 +678,14 @@
       vehicles:'Vehicles', params:'Common parameters', results:'Results',
       v1Default:'Vehicle 1', v2Default:'Vehicle 2',
       ice:'ICE', ev:'Electric',
-      diesel:'Diesel', petrol:'Petrol', cng:'CNG', lpg:'LPG', hybrid:'Hybrid', electric:'Electric',
+      diesel:'Diesel', petrol:'Petrol', cng:'CNG', lpg:'LPG', hybrid:'Hybrid', electric:'Electric', dieseladblue:'Diesel+AdBlue',
       purchasePrice:'Purchase price', subsidy:'Subsidy / discount',
       consIce:'Consumption (L/100km)', consCng:'Consumption (kg/100km)', consEv:'Consumption (kWh/100km)',
       consLpg:'LPG consumption (L/100km)', consLpgSecondary:'Petrol consumption (L/100km)',
       consHybridFuel:'Fuel consumption (L/100km)', consHybridSecondary:'Electricity (kWh/100km)',
+      consAdblueSecondary:'AdBlue consumption (L/1000km)',
       hybridBaseFuel:'Hybrid fuel type',
-      lpgPrice:'LPG price', cngPrice:'CNG price',
+      lpgPrice:'LPG price', cngPrice:'CNG price', adbluePrice:'AdBlue price',
       maint:'Maintenance', insurance:'Insurance', roadTax:'Road toll / vignette',
       residual:'Residual value',
       kmMonth:'Kilometers / month', fuelPrice:'Fuel price', elPrice:'Electricity price', years:'Years of use',
@@ -754,6 +756,7 @@
     fuelPrice: 1.50,            // основна цена (дизел или бензин — според горивото на ПС)
     lpgPrice: 0.80,             // €/л LPG
     cngPrice: 1.20,              // €/кг CNG
+    adbluePrice: 1.00,          // €/л AdBlue
     elPrice: 0.40,              // €/kWh
     years: 5
   };
@@ -787,6 +790,13 @@
       // бензин/дизел л/100км × €/л  +  ток kWh/100км × €/kWh
       const primary = (v.consumption / 100) * state.fuelPrice;
       const secondary = (v.secondaryConsumption / 100) * state.elPrice;
+      return { primary, secondary, total: primary + secondary };
+    }
+    if (v.fuel === 'dieseladblue') {
+      // дизел л/100км × €/л  +  AdBlue л/1000км × €/л  (внимание: делим на 1000, не на 100)
+      // diesel L/100km × €/L  +  AdBlue L/1000km × €/L  (note: divide by 1000, not 100)
+      const primary = (v.consumption / 100) * state.fuelPrice;
+      const secondary = (v.secondaryConsumption / 1000) * state.adbluePrice;
       return { primary, secondary, total: primary + secondary };
     }
     // дизел / бензин
@@ -844,6 +854,7 @@
       {id:'cng', cat:'ice'},
       {id:'lpg', cat:'ice'},
       {id:'hybrid', cat:'ice'},
+      {id:'dieseladblue', cat:'ice'},
       {id:'electric', cat:'ev'}
     ];
     return types.map(ft => {
@@ -868,22 +879,25 @@
     if (v.type === 'ev') return '1';
     return '0.5';
   }
-  // Втора консумация (само за LPG/Хибрид)
+  // Втора консумация (само за LPG/Хибрид/Дизел+AdBlue)
   function hasSecondary(v) {
-    return v.type !== 'ev' && (v.fuel === 'lpg' || v.fuel === 'hybrid');
+    return v.type !== 'ev' && (v.fuel === 'lpg' || v.fuel === 'hybrid' || v.fuel === 'dieseladblue');
   }
   function secondaryLabel(v) {
     if (v.fuel === 'lpg') return t('consLpgSecondary');     // бензин в LPG автомобил
     if (v.fuel === 'hybrid') return t('consHybridSecondary'); // ток в хибрид
+    if (v.fuel === 'dieseladblue') return t('consAdblueSecondary'); // AdBlue в дизел
     return '';
   }
   function secondaryUnit(v) {
     if (v.fuel === 'lpg') return 'L/100' + t('kmUnit');
     if (v.fuel === 'hybrid') return 'kWh/100' + t('kmUnit');
+    if (v.fuel === 'dieseladblue') return 'L/1000' + t('kmUnit');
     return '';
   }
   function secondaryStep(v) {
     if (v.fuel === 'hybrid') return '1';
+    if (v.fuel === 'dieseladblue') return '0.1';
     return '0.5';
   }
 
@@ -968,6 +982,7 @@
   function globalsHtml() {
     const usesLpg = state.v1.fuel === 'lpg' || state.v2.fuel === 'lpg';
     const usesCng = state.v1.fuel === 'cng' || state.v2.fuel === 'cng';
+    const usesAdblue = state.v1.fuel === 'dieseladblue' || state.v2.fuel === 'dieseladblue';
     return `
       <div class="vc-sl-row">
         <span class="vc-sl-lbl">${t('kmMonth')}</span>
@@ -991,6 +1006,13 @@
         <span class="vc-sl-lbl">${t('cngPrice')}</span>
         <input type="range" min="0.50" max="3.00" step="0.05" value="${state.cngPrice}" data-global="cngPrice">
         <span class="vc-sl-val" id="cng-out">${state.cngPrice.toFixed(2)} ${t('kgUnit')}</span>
+      </div>
+      ` : ''}
+      ${usesAdblue ? `
+      <div class="vc-sl-row">
+        <span class="vc-sl-lbl">${t('adbluePrice')}</span>
+        <input type="range" min="0.5" max="3.0" step="0.1" value="${state.adbluePrice}" data-global="adbluePrice">
+        <span class="vc-sl-val" id="ab-out">${state.adbluePrice.toFixed(2)} ${t('lUnit')}</span>
       </div>
       ` : ''}
       <div class="vc-sl-row">
@@ -1421,6 +1443,9 @@
           } else if (fuel === 'hybrid') {
             v.consumption = 5;             // бензин л/100км
             v.secondaryConsumption = 8;    // ток kWh/100км
+          } else if (fuel === 'dieseladblue') {
+            v.consumption = 7;             // дизел л/100км
+            v.secondaryConsumption = 1.5;  // AdBlue л/1000км
           } else if (fuel === 'cng') {
             v.consumption = 8;             // кг/100км
             v.secondaryConsumption = 0;
@@ -1462,12 +1487,14 @@
     const yrOut = document.getElementById('yr-out');
     const lpgOut = document.getElementById('lpg-out');
     const cngOut = document.getElementById('cng-out');
+    const abOut = document.getElementById('ab-out');
     if (kmOut) kmOut.textContent = fmtKm(state.km);
     if (fpOut) fpOut.textContent = state.fuelPrice.toFixed(2) + ' ' + t('lUnit');
     if (epOut) epOut.textContent = state.elPrice.toFixed(2) + ' ' + t('mwhUnit');
     if (yrOut) yrOut.textContent = state.years + ' ' + t('yrUnit');
     if (lpgOut) lpgOut.textContent = state.lpgPrice.toFixed(2) + ' ' + t('lUnit');
     if (cngOut) cngOut.textContent = state.cngPrice.toFixed(2) + ' ' + t('kgUnit');
+    if (abOut) abOut.textContent = state.adbluePrice.toFixed(2) + ' ' + t('lUnit');
 
     const d = calc();
     document.getElementById('metrics').innerHTML = metricsHtml(d);
@@ -1488,7 +1515,7 @@
     purchase:'p', subsidy:'s', consumption:'c', secondaryConsumption:'sc',
     maintPerYear:'m', insurance:'i', roadTax:'rt', residualPct:'r',
     // globals
-    km:'km', fuelPrice:'fp', lpgPrice:'lp', cngPrice:'cp', elPrice:'ep', years:'y',
+    km:'km', fuelPrice:'fp', lpgPrice:'lp', cngPrice:'cp', adbluePrice:'ap', elPrice:'ep', years:'y',
     lang:'l'
   };
 
@@ -1505,7 +1532,7 @@
     };
     writeVeh('1', state.v1);
     writeVeh('2', state.v2);
-    ['km','fuelPrice','lpgPrice','cngPrice','elPrice','years'].forEach(k => {
+    ['km','fuelPrice','lpgPrice','cngPrice','adbluePrice','elPrice','years'].forEach(k => {
       params.set(URL_KEYS[k], String(state[k]));
     });
     params.set(URL_KEYS.lang, lang);
@@ -1522,7 +1549,7 @@
 
     const numFields = new Set(['purchase','subsidy','consumption','secondaryConsumption',
       'maintPerYear','insurance','roadTax','residualPct',
-      'km','fuelPrice','lpgPrice','cngPrice','elPrice','years']);
+      'km','fuelPrice','lpgPrice','cngPrice','adbluePrice','elPrice','years']);
 
     const readVeh = (prefix, v) => {
       Object.keys(URL_KEYS).forEach(k => {
@@ -1541,7 +1568,7 @@
     readVeh('1', state.v1);
     readVeh('2', state.v2);
 
-    ['km','fuelPrice','lpgPrice','cngPrice','elPrice','years'].forEach(k => {
+    ['km','fuelPrice','lpgPrice','cngPrice','adbluePrice','elPrice','years'].forEach(k => {
       const raw = params.get(URL_KEYS[k]);
       if (raw === null) return;
       const n = parseFloat(raw);
