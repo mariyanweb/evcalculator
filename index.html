@@ -1,0 +1,1666 @@
+<h2 id="srTitle" style="font-family:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;text-align:center;font-size:24px;font-weight:600;color:var(--color-text-primary);margin:0 0 24px;letter-spacing:.04em;text-transform:uppercase;max-width:920px;margin-left:auto;margin-right:auto">Universal Financial Comparison Calculator for Two Vehicles</h2>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap');
+
+.vc-wrap{
+  padding:1rem 0;
+  font-family:'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  max-width:920px;
+  margin:0 auto;
+  color:var(--color-text-primary);
+}
+.vc-wrap input,.vc-wrap button,.vc-wrap select,.vc-wrap textarea{
+  font-family:'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+.vc-wrap input[type="number"],
+.vc-wrap .vc-summary-val,
+.vc-wrap .vc-metric-val,
+.vc-wrap .vc-be-big,
+.vc-wrap .vc-sl-val{
+  font-family:'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-feature-settings:"tnum";
+  font-variant-numeric:tabular-nums;
+}
+
+/* Toolbar */
+.vc-toolbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:18px;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.vc-section-lbl{
+  font-size:12px;
+  font-weight:600;
+  color:var(--color-text-secondary);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  margin:0;
+}
+
+/* Език превключвател — ясно, видимо активно състояние */
+.vc-lang{
+  display:inline-flex;
+  background:#EEE9F5;
+  border-radius:999px;
+  padding:3px;
+  gap:2px;
+}
+.vc-lang button{
+  background:transparent;
+  border:none;
+  padding:6px 14px;
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+  color:#8678A0;
+  border-radius:999px;
+  transition:all .18s ease;
+  letter-spacing:.02em;
+}
+.vc-lang button:hover:not(.active){
+  color:#5D4F75;
+}
+.vc-lang button.active{
+  background:#fff;
+  color:#5D4F75;
+  box-shadow:0 1px 3px rgba(140,130,180,0.25), 0 1px 1px rgba(0,0,0,0.04);
+}
+
+/* Карти за превозни средства */
+.vc-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+  margin-bottom:24px;
+}
+.vc-card{
+  border-radius:20px;
+  padding:1.25rem 1.4rem;
+  box-shadow:0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+  position:relative;
+  border:1px solid rgba(0,0,0,0.04);
+}
+.vc-card.v1{
+  background:#EBF2F9;
+  border-top:3px solid #5B8FBE;
+}
+.vc-card.v2{
+  background:#EFF5E6;
+  border-top:3px solid #7BA85A;
+}
+
+.vc-badge{
+  display:inline-block;
+  font-size:14px;
+  font-weight:700;
+  padding:6px 14px;
+  border-radius:999px;
+  margin-bottom:12px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.vc-badge.v1{background:#5B8FBE;color:#fff}
+.vc-badge.v2{background:#7BA85A;color:#fff}
+
+.vc-name-input{
+  width:100%;
+  box-sizing:border-box;
+  background:rgba(255,255,255,0.45);
+  border:1px solid rgba(0,0,0,0.10);
+  border-radius:10px;
+  font-size:20px;
+  font-weight:600;
+  color:var(--color-text-primary);
+  padding:8px 12px;
+  font-family:inherit;
+  outline:none;
+  margin-bottom:14px;
+  transition:all .15s ease;
+}
+.vc-name-input:hover{
+  background:rgba(255,255,255,0.75);
+}
+.vc-card.v1 .vc-name-input{
+  border-color:rgba(91,143,190,0.35);
+}
+.vc-card.v2 .vc-name-input{
+  border-color:rgba(123,168,90,0.35);
+}
+.vc-card.v1 .vc-name-input:hover{
+  border-color:rgba(91,143,190,0.60);
+}
+.vc-card.v2 .vc-name-input:hover{
+  border-color:rgba(123,168,90,0.60);
+}
+.vc-card.v1 .vc-name-input:focus{
+  background:#fff;
+  border-color:#5B8FBE;
+  box-shadow:0 0 0 3px rgba(91,143,190,0.18);
+}
+.vc-card.v2 .vc-name-input:focus{
+  background:#fff;
+  border-color:#7BA85A;
+  box-shadow:0 0 0 3px rgba(123,168,90,0.18);
+}
+
+.vc-ftype{
+  display:flex;
+  gap:5px;
+  margin-bottom:14px;
+  flex-wrap:wrap;
+}
+.vc-ftype button{
+  background:var(--color-background-secondary);
+  border:1px solid transparent;
+  border-radius:999px;
+  padding:5px 11px;
+  font-size:12px;
+  font-weight:500;
+  cursor:pointer;
+  color:var(--color-text-secondary);
+  transition:all .15s ease;
+}
+.vc-ftype button:hover:not(.active){
+  background:var(--color-background-primary);
+  color:var(--color-text-primary);
+}
+.vc-ftype button.active{
+  background:var(--color-background-primary);
+  border-color:rgba(0,0,0,0.12);
+  color:var(--color-text-primary);
+  font-weight:600;
+  box-shadow:0 1px 2px rgba(0,0,0,0.04);
+}
+
+/* Hybrid base fuel — наследява стила на ftype */
+.vc-hybrid-btn{
+  background:var(--color-background-secondary);
+  border:1px solid transparent;
+  border-radius:999px;
+  padding:5px 11px;
+  font-size:12px;
+  font-weight:500;
+  cursor:pointer;
+  color:var(--color-text-secondary);
+  transition:all .15s ease;
+}
+.vc-hybrid-btn.active{
+  background:var(--color-background-primary);
+  border-color:rgba(0,0,0,0.12);
+  color:var(--color-text-primary);
+  font-weight:600;
+  box-shadow:0 1px 2px rgba(0,0,0,0.04);
+}
+
+/* Редове с числови входове */
+.vc-input-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:7px 0;
+  font-size:14px;
+  gap:10px;
+}
+.vc-input-row + .vc-input-row{
+  border-top:1px solid rgba(0,0,0,0.04);
+}
+.vc-input-row label{
+  color:var(--color-text-secondary);
+  flex:1;
+}
+.vc-input-row input[type="number"]{
+  width:88px;
+  text-align:right;
+  background:var(--color-background-secondary);
+  border:1px solid rgba(0,0,0,0.10);
+  border-radius:10px;
+  padding:5px 9px;
+  font-size:14px;
+  font-weight:600;
+  color:var(--color-text-primary);
+  transition:all .15s ease;
+}
+/* Per-card accent borders: v1 blue, v2 green */
+.vc-card.v1 .vc-input-row input[type="number"]{
+  border-color:rgba(91,143,190,0.35);
+}
+.vc-card.v2 .vc-input-row input[type="number"]{
+  border-color:rgba(123,168,90,0.35);
+}
+.vc-card.v1 .vc-input-row input[type="number"]:hover{
+  background:var(--color-background-primary);
+  border-color:rgba(91,143,190,0.60);
+}
+.vc-card.v2 .vc-input-row input[type="number"]:hover{
+  background:var(--color-background-primary);
+  border-color:rgba(123,168,90,0.60);
+}
+.vc-card.v1 .vc-input-row input[type="number"]:focus{
+  outline:none;
+  background:var(--color-background-primary);
+  border-color:#5B8FBE;
+  box-shadow:0 0 0 3px rgba(91,143,190,0.18);
+}
+.vc-card.v2 .vc-input-row input[type="number"]:focus{
+  outline:none;
+  background:var(--color-background-primary);
+  border-color:#7BA85A;
+  box-shadow:0 0 0 3px rgba(123,168,90,0.18);
+}
+/* Fallback for inputs not inside a v1/v2 card (kept neutral) */
+.vc-input-row input[type="number"]:hover{
+  background:var(--color-background-primary);
+}
+.vc-input-row input[type="number"]:focus{
+  outline:none;
+  background:var(--color-background-primary);
+  box-shadow:0 0 0 3px rgba(91,143,190,0.12);
+}
+.vc-unit{
+  font-size:12px;
+  color:var(--color-text-tertiary);
+  width:78px;
+  flex-shrink:0;
+  text-align:left;
+}
+
+/* Сгъваема секция */
+.vc-collapse{
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px solid rgba(0,0,0,0.05);
+}
+.vc-collapse summary{
+  cursor:pointer;
+  font-size:12px;
+  font-weight:600;
+  color:var(--color-text-secondary);
+  padding:6px 10px 6px 6px;
+  list-style:none;
+  user-select:none;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  border-radius:999px;
+  transition:background-color .15s ease, color .15s ease;
+}
+.vc-collapse summary::-webkit-details-marker{display:none}
+.vc-collapse summary::before{
+  content:'+';
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:22px;
+  height:22px;
+  font-size:16px;
+  font-weight:600;
+  line-height:1;
+  border-radius:50%;
+  background:var(--color-background-primary);
+  color:var(--color-text-primary);
+  border:1px solid rgba(0,0,0,0.12);
+  box-shadow:0 1px 2px rgba(0,0,0,0.04);
+  transition:all .18s ease;
+}
+.vc-collapse[open] summary::before{
+  content:'−';
+}
+/* Per-card accent for the toggle button — picks up card color when open */
+.vc-card.v1 .vc-collapse[open] summary::before{
+  background:#5B8FBE;
+  color:#fff;
+  border-color:#5B8FBE;
+}
+.vc-card.v2 .vc-collapse[open] summary::before{
+  background:#7BA85A;
+  color:#fff;
+  border-color:#7BA85A;
+}
+.vc-collapse summary:hover{
+  color:var(--color-text-primary);
+  background:rgba(0,0,0,0.03);
+}
+.vc-collapse summary:hover::before{
+  border-color:rgba(0,0,0,0.22);
+  box-shadow:0 1px 3px rgba(0,0,0,0.08);
+}
+.vc-collapse[open] summary:hover::before{
+  filter:brightness(0.95);
+}
+
+/* Глобални плъзгачи — мек лавандулов фон */
+.vc-globals{
+  background:linear-gradient(135deg, #F4F1FA 0%, #EFF4FB 100%);
+  border-radius:18px;
+  padding:16px 20px;
+  margin-bottom:24px;
+  border:1px solid rgba(140,130,180,0.10);
+}
+.vc-sl-row{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:7px 0;
+}
+.vc-sl-row + .vc-sl-row{
+  border-top:1px solid rgba(0,0,0,0.04);
+}
+.vc-sl-lbl{
+  font-size:14px;
+  color:var(--color-text-secondary);
+  width:180px;
+  flex-shrink:0;
+}
+.vc-sl-val{
+  font-size:14px;
+  font-weight:600;
+  color:var(--color-text-primary);
+  min-width:96px;
+  text-align:right;
+}
+.vc-sl-row input[type="range"]{
+  flex:1;
+  height:8px;
+  -webkit-appearance:none;
+  appearance:none;
+  background:linear-gradient(90deg, #C9D9EC 0%, #D6E4F2 100%);
+  border-radius:999px;
+  outline:none;
+  cursor:pointer;
+  border:1px solid rgba(91,143,190,0.18);
+}
+.vc-sl-row input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  appearance:none;
+  width:22px;
+  height:22px;
+  background:#fff;
+  border:2.5px solid #5B8FBE;
+  border-radius:50%;
+  cursor:pointer;
+  box-shadow:0 2px 6px rgba(91,143,190,0.35), 0 1px 2px rgba(0,0,0,0.08);
+  transition:transform .12s ease, box-shadow .12s ease;
+}
+.vc-sl-row input[type="range"]::-webkit-slider-thumb:hover{
+  transform:scale(1.15);
+  box-shadow:0 3px 10px rgba(91,143,190,0.5), 0 1px 3px rgba(0,0,0,0.1);
+}
+.vc-sl-row input[type="range"]::-webkit-slider-thumb:active{
+  transform:scale(1.08);
+}
+.vc-sl-row input[type="range"]::-moz-range-thumb{
+  width:22px;
+  height:22px;
+  background:#fff;
+  border:2.5px solid #5B8FBE;
+  border-radius:50%;
+  cursor:pointer;
+  box-shadow:0 2px 6px rgba(91,143,190,0.35), 0 1px 2px rgba(0,0,0,0.08);
+}
+.vc-sl-row input[type="range"]::-moz-range-track{
+  background:linear-gradient(90deg, #C9D9EC 0%, #D6E4F2 100%);
+  height:8px;
+  border-radius:999px;
+}
+
+/* Метрики — всяка с различен пастелен фон */
+.vc-metrics{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-bottom:22px;
+}
+.vc-metric{
+  border-radius:16px;
+  padding:14px 16px;
+  border:1px solid rgba(0,0,0,0.04);
+}
+.vc-metric:nth-child(1){background:linear-gradient(135deg, #EBF2F9 0%, #F4F8FC 100%)}  /* небесно синьо */
+.vc-metric:nth-child(2){background:linear-gradient(135deg, #EFF5E6 0%, #F6FAEF 100%)}  /* шалфей */
+.vc-metric:nth-child(3){background:linear-gradient(135deg, #FAF1E8 0%, #FCF6EE 100%)}  /* праскова */
+.vc-metric:nth-child(4){background:linear-gradient(135deg, #F4ECF5 0%, #FAF4FA 100%)}  /* лавандула */
+.vc-metric-lbl{
+  font-size:12px;
+  color:var(--color-text-secondary);
+  margin-bottom:6px;
+  line-height:1.35;
+}
+.vc-metric-val{
+  font-size:20px;
+  font-weight:600;
+  color:var(--color-text-primary);
+  letter-spacing:-.01em;
+}
+.vc-metric-sub{
+  font-size:12px;
+  color:var(--color-text-tertiary);
+  margin-top:3px;
+}
+
+/* Break-even */
+.vc-be-box{
+  background:linear-gradient(135deg, #FAF1E8 0%, #FBF6EE 100%);
+  border-radius:18px;
+  padding:18px 22px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:24px;
+  gap:18px;
+  flex-wrap:wrap;
+  border:1px solid rgba(195,150,90,0.14);
+}
+.vc-be-lbl{
+  font-size:12px;
+  color:var(--color-text-secondary);
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  font-weight:600;
+  margin-bottom:4px;
+}
+.vc-be-big{
+  font-size:26px;
+  font-weight:600;
+  color:var(--color-text-primary);
+  letter-spacing:-.01em;
+}
+.vc-be-sub{
+  font-size:12px;
+  color:var(--color-text-tertiary);
+  margin-top:3px;
+}
+
+/* Финални таблици — централизирани, не на цяла ширина */
+.vc-totals{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+  margin-bottom:22px;
+}
+.vc-total-card{
+  border-radius:20px;
+  padding:1.3rem 1.5rem;
+  background:var(--color-background-primary);
+  box-shadow:0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+  border:1px solid rgba(0,0,0,0.04);
+}
+.vc-total-card.v1{background:linear-gradient(180deg, #F6FAFD 0%, var(--color-background-primary) 100%)}
+.vc-total-card.v2{background:linear-gradient(180deg, #F7FAF1 0%, var(--color-background-primary) 100%)}
+
+.vc-summary-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  padding:7px 0;
+  font-size:14px;
+}
+.vc-summary-row + .vc-summary-row{
+  border-top:1px solid rgba(0,0,0,0.05);
+}
+.vc-summary-lbl{color:var(--color-text-secondary)}
+.vc-summary-val{
+  font-weight:600;
+  color:var(--color-text-primary);
+}
+
+/* Победител */
+.vc-winner{
+  border-radius:16px;
+  padding:14px 20px;
+  font-size:14px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.vc-winner.w1{background:#EBF2F9;color:#3B6F9E}
+.vc-winner.w2{background:#EFF5E6;color:#52793A}
+
+/* Легенда + графика */
+.vc-legend{
+  display:flex;
+  gap:22px;
+  margin-bottom:10px;
+  font-size:12px;
+  color:var(--color-text-secondary);
+  flex-wrap:wrap;
+}
+.vc-legend-item{display:flex;align-items:center;gap:7px}
+.vc-legend-line.v1{
+  width:22px;
+  height:3px;
+  background:#5B8FBE;
+  display:inline-block;
+  border-radius:999px;
+}
+.vc-legend-line.v2{
+  width:22px;
+  height:3px;
+  display:inline-block;
+  background:#7BA85A;
+  border-radius:999px;
+}
+.vc-chart-wrap{
+  position:relative;
+  width:100%;
+  height:300px;
+  margin-bottom:24px;
+  background:linear-gradient(180deg, var(--color-background-primary) 0%, rgba(248,247,253,0.6) 100%);
+  border-radius:18px;
+  padding:18px 14px 12px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+  border:1px solid rgba(0,0,0,0.04);
+  box-sizing:border-box;
+}
+
+@media (max-width:640px){
+  .vc-grid,.vc-totals{grid-template-columns:1fr}
+  .vc-metrics{grid-template-columns:repeat(2,1fr)}
+  .vc-sl-lbl{width:130px}
+}
+
+/* Share button */
+.vc-share-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:#fff;
+  border:1px solid rgba(0,0,0,0.10);
+  border-radius:999px;
+  padding:6px 14px;
+  font-size:12px;
+  font-weight:600;
+  color:#5D4F75;
+  cursor:pointer;
+  letter-spacing:.02em;
+  transition:all .18s ease;
+  font-family:inherit;
+}
+.vc-share-btn:hover{
+  background:#F6F2FA;
+  border-color:rgba(0,0,0,0.16);
+  box-shadow:0 1px 3px rgba(140,130,180,0.18);
+}
+.vc-share-btn:active{
+  transform:translateY(1px);
+}
+.vc-share-btn.copied{
+  background:#E8F5E2;
+  border-color:#7BA85A;
+  color:#3F6B22;
+}
+.vc-share-btn svg{
+  flex-shrink:0;
+}
+</style>
+
+<div class="vc-wrap">
+
+<div class="vc-toolbar">
+  <p class="vc-section-lbl" id="lblVehicles">Vehicles</p>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <button type="button" class="vc-share-btn" id="shareBtn" aria-live="polite">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      <span id="shareBtnLbl">Share</span>
+    </button>
+    <div class="vc-lang" role="tablist" aria-label="Език / Language">
+      <button data-lang="bg" aria-pressed="false">БГ</button>
+      <button data-lang="en" class="active" aria-pressed="true">EN</button>
+    </div>
+  </div>
+</div>
+
+<div class="vc-grid" id="vehicleCards"></div>
+
+<p class="vc-section-lbl" id="lblParams" style="margin-bottom:10px">Common parameters</p>
+<div class="vc-globals" id="globals"></div>
+
+<p class="vc-section-lbl" id="lblResults" style="margin-bottom:10px">Results</p>
+<div class="vc-metrics" id="metrics"></div>
+<div id="beArea"></div>
+
+<div class="vc-totals" id="totals"></div>
+
+<div class="vc-legend" id="legend"></div>
+<div class="vc-chart-wrap">
+  <canvas id="costChart" role="img" aria-label="Cumulative net total costs over years"></canvas>
+</div>
+
+<div id="winnerArea"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+(function(){
+  // ============ ПРЕВОДИ / TRANSLATIONS ============
+  const T = {
+    bg: {
+      vehicles:'Превозни средства', params:'Общи параметри', results:'Резултати',
+      v1Default:'Превозно средство 1', v2Default:'Превозно средство 2',
+      ice:'ДВГ', ev:'Електрическо',
+      diesel:'Дизел', petrol:'Бензин', cng:'CNG', lpg:'LPG', hybrid:'Хибрид', electric:'Електро', dieseladblue:'Дизел+AdBlue',
+      purchasePrice:'Покупна цена', subsidy:'Субсидия / отстъпка',
+      consIce:'Разход (л/100км)', consCng:'Разход (кг/100км)', consEv:'Разход (kWh/100км)',
+      consLpg:'Разход LPG (л/100км)', consLpgSecondary:'Разход бензин (л/100км)',
+      consHybridFuel:'Разход гориво (л/100км)', consHybridSecondary:'Разход ток (kWh/100км)',
+      consAdblueSecondary:'Разход AdBlue (л/1000км)',
+      hybridBaseFuel:'Гориво на хибрида',
+      lpgPrice:'Цена LPG', cngPrice:'Цена CNG', adbluePrice:'Цена AdBlue',
+      maint:'Поддръжка', insurance:'Застраховка', roadTax:'Винетка / тол',
+      residual:'Остатъчна стойност',
+      kmMonth:'Километри / месец', fuelPrice:'Цена гориво', elPrice:'Цена ток', years:'Години на ползване',
+      kmUnit:'км', lUnit:'€/л', kgUnit:'€/кг', mwhUnit:'€/kWh', yrUnit:'год.',
+      perKm:'/км', perMonth:'/мес.', perYear:'/год.', ofPrice:'% от цената',
+      opCostMonth:'Оп. разход/мес.', saveMonth:'Спестяване/месец', diff:'Разлика за',
+      inFavor1:'в полза на', inFavor2:'в полза на',
+      breakEven:'Break-even точка', notReached:'Не се достига', atTheseFuel:'при тези цени дизайнът е по-евтин',
+      addInvest:'Доп. инвестиция', priceDiff:'разлика в покупната цена',
+      monthsToBE:'месеца разходите се изравняват',
+      consumption:'Консумация', fuelCost:'Разход гориво', elCost:'Разход ток',
+      maintPerKm:'Поддръжка/км', maintAnnual:'Поддръжка/год.', fuelMonthly:'Гориво/месец',
+      fuelShort:'гориво', fixedShort:'фикс.',
+      totalOpKm:'Общ оп. разход/км', opMonthly:'Оп. разходи/месец', opYears:'Оп. разходи за',
+      insAnnual:'Застраховка/год.', tollAnnual:'Винетка/тол/год.',
+      netPurchase:'Нетна покупна цена', residualEnd:'Остатъчна стойност в края',
+      grandTotal:'Обща нетна стойност за', moreFavorable:'е по-изгодно със сума от',
+      advanced:'Допълнителни разходи', wins:'е по-изгодно',
+      yrShort:'г.', moShort:'мес.', start:'Старт', yearShort:'Год.',
+      ariaChart:'Кумулативни общи нетни разходи по години',
+      pickFuel:'Тип гориво',
+      share:'Споделяне', shareCopied:'Копирано ✓'
+    },
+    en: {
+      vehicles:'Vehicles', params:'Common parameters', results:'Results',
+      v1Default:'Vehicle 1', v2Default:'Vehicle 2',
+      ice:'ICE', ev:'Electric',
+      diesel:'Diesel', petrol:'Petrol', cng:'CNG', lpg:'LPG', hybrid:'Hybrid', electric:'Electric', dieseladblue:'Diesel+AdBlue',
+      purchasePrice:'Purchase price', subsidy:'Subsidy / discount',
+      consIce:'Consumption (L/100km)', consCng:'Consumption (kg/100km)', consEv:'Consumption (kWh/100km)',
+      consLpg:'LPG consumption (L/100km)', consLpgSecondary:'Petrol consumption (L/100km)',
+      consHybridFuel:'Fuel consumption (L/100km)', consHybridSecondary:'Electricity (kWh/100km)',
+      consAdblueSecondary:'AdBlue consumption (L/1000km)',
+      hybridBaseFuel:'Hybrid fuel type',
+      lpgPrice:'LPG price', cngPrice:'CNG price', adbluePrice:'AdBlue price',
+      maint:'Maintenance', insurance:'Insurance', roadTax:'Road toll / vignette',
+      residual:'Residual value',
+      kmMonth:'Kilometers / month', fuelPrice:'Fuel price', elPrice:'Electricity price', years:'Years of use',
+      kmUnit:'km', lUnit:'€/L', kgUnit:'€/kg', mwhUnit:'€/kWh', yrUnit:'yr',
+      perKm:'/km', perMonth:'/mo', perYear:'/yr', ofPrice:'% of price',
+      opCostMonth:'Op. cost/month', saveMonth:'Saving/month', diff:'Difference over',
+      inFavor1:'in favor of', inFavor2:'in favor of',
+      breakEven:'Break-even point', notReached:'Not reached', atTheseFuel:'at these prices the other is cheaper',
+      addInvest:'Extra investment', priceDiff:'purchase price difference',
+      monthsToBE:'months until costs equalize',
+      consumption:'Consumption', fuelCost:'Fuel cost', elCost:'Electricity cost',
+      maintPerKm:'Maintenance/km', maintAnnual:'Maintenance/yr', fuelMonthly:'Fuel/month',
+      fuelShort:'fuel', fixedShort:'fixed',
+      totalOpKm:'Total op. cost/km', opMonthly:'Op. costs/month', opYears:'Op. costs over',
+      insAnnual:'Insurance/yr', tollAnnual:'Toll/vignette/yr',
+      netPurchase:'Net purchase price', residualEnd:'Residual value at end',
+      grandTotal:'Net total cost over', moreFavorable:'is more economical by',
+      advanced:'Additional costs', wins:'is more economical',
+      yrShort:'y', moShort:'mo', start:'Start', yearShort:'Year',
+      ariaChart:'Cumulative net total costs over years',
+      pickFuel:'Fuel type',
+      share:'Share', shareCopied:'Copied ✓'
+    }
+  };
+
+  let lang = 'en';
+  const t = (k) => T[lang][k];
+
+  // ============ СЪСТОЯНИЕ / STATE ============
+  // Стойности по подразбиране копират примера (електрически камион vs дизелов)
+  // Default values mirror the original (electric truck vs diesel)
+  // Модел на консумация:
+  //  - EV: consumption е kWh/100км; secondaryConsumption не се ползва
+  //  - ICE (дизел/бензин/CNG): consumption е л/100км (или кг/100км за CNG); secondary не се ползва
+  //  - LPG: consumption = LPG л/100км; secondaryConsumption = бензин л/100км (пилотна доза/превключване)
+  //  - Хибрид: consumption = бензин/дизел л/100км; secondaryConsumption = ток kWh/100км
+  // hybridBaseFuel определя кое е "основното" гориво при хибрид: 'petrol' или 'diesel'
+  const state = {
+    v1: {
+	  name: '',
+      type: 'ice',
+      fuel: 'petrol',
+      hybridBaseFuel: 'petrol',
+      purchase: 60000,
+      subsidy: 0,
+      consumption: 8,
+      secondaryConsumption: 0,
+      maintPerYear: 1000,
+      insurance: 1800,
+      roadTax: 49.6,
+      residualPct: 30
+    },
+    v2: {
+      name: '',
+      type: 'ev',
+      fuel: 'electric',
+      hybridBaseFuel: 'petrol',
+      purchase: 70000,
+      subsidy: 0,
+      consumption: 22,
+      secondaryConsumption: 0,
+      maintPerYear: 500,
+      insurance: 2100,
+      roadTax: 49.6,
+      residualPct: 20
+    },
+    km: 2500,
+    fuelPrice: 1.50,            // основна цена (дизел или бензин — според горивото на ПС)
+    lpgPrice: 0.80,             // €/л LPG
+    cngPrice: 1.20,              // €/кг CNG
+    adbluePrice: 1.00,          // €/л AdBlue
+    elPrice: 0.40,              // €/kWh
+    years: 5
+  };
+
+  // ============ ФОРМАТИРАНЕ / FORMATTING ============
+  const locale = () => lang === 'bg' ? 'de-DE' : 'en-GB';
+  const eur = (n) => n.toLocaleString(locale(), {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
+  const ct = (n) => (n*100).toFixed(2) + ' €ct';
+  const fmtKm = (n) => parseInt(n).toLocaleString(locale()) + ' ' + t('kmUnit');
+  const fmtPct = (n) => n.toFixed(0) + '%';
+
+  // ============ ИЗЧИСЛЕНИЯ / CALCULATIONS ============
+  // Връща структура: {primary, secondary, total} в €/км
+  function fuelCostPerKm(v) {
+    if (v.type === 'ev') {
+      // kWh/100км × €/kWh
+      const total = (v.consumption / 100) * state.elPrice;
+      return { primary: total, secondary: 0, total };
+    }
+    if (v.fuel === 'cng') {
+      const total = (v.consumption / 100) * state.cngPrice;
+      return { primary: total, secondary: 0, total };
+    }
+    if (v.fuel === 'lpg') {
+      // LPG л/100км × €/л LPG  +  бензин л/100км × €/л
+      const primary = (v.consumption / 100) * state.lpgPrice;
+      const secondary = (v.secondaryConsumption / 100) * state.fuelPrice;
+      return { primary, secondary, total: primary + secondary };
+    }
+    if (v.fuel === 'hybrid') {
+      // бензин/дизел л/100км × €/л  +  ток kWh/100км × €/kWh
+      const primary = (v.consumption / 100) * state.fuelPrice;
+      const secondary = (v.secondaryConsumption / 100) * state.elPrice;
+      return { primary, secondary, total: primary + secondary };
+    }
+    if (v.fuel === 'dieseladblue') {
+      // дизел л/100км × €/л  +  AdBlue л/1000км × €/л  (внимание: делим на 1000, не на 100)
+      // diesel L/100km × €/L  +  AdBlue L/1000km × €/L  (note: divide by 1000, not 100)
+      const primary = (v.consumption / 100) * state.fuelPrice;
+      const secondary = (v.secondaryConsumption / 1000) * state.adbluePrice;
+      return { primary, secondary, total: primary + secondary };
+    }
+    // дизел / бензин
+    const total = (v.consumption / 100) * state.fuelPrice;
+    return { primary: total, secondary: 0, total };
+  }
+
+  function calc() {
+    const kmYear = state.km * 12;
+    const totalKm = kmYear * state.years;
+
+    function vehicleCalc(v) {
+      const fuel = fuelCostPerKm(v);
+      const fuelKm = fuel.total;
+      // Поддръжката вече е годишна фиксирана сума, не зависи от пробега
+      const opKm = fuelKm; // оперативен разход на км = само гориво
+      const opMonth = fuelKm * state.km;
+      const opYearly = fuelKm * kmYear;
+      const fixedYearly = v.insurance + v.roadTax + v.maintPerYear;
+      const fixedTotal = fixedYearly * state.years;
+      const opTotal = fuelKm * totalKm;
+      const netPurchase = v.purchase - v.subsidy;
+      const residualValue = v.purchase * (v.residualPct / 100);
+      const grandTotal = netPurchase + opTotal + fixedTotal - residualValue;
+      // Показваме общ месечен разход (гориво + дял от фиксираните) за по-смислено сравнение
+      const totalMonthly = opMonth + fixedYearly / 12;
+      return { fuel, fuelKm, opKm, opMonth, opYearly, fixedYearly, fixedTotal, opTotal, totalMonthly, netPurchase, residualValue, grandTotal };
+    }
+
+    const c1 = vehicleCalc(state.v1);
+    const c2 = vehicleCalc(state.v2);
+
+    // Break-even по операционни + фиксирани разходи спрямо разлика в нетна покупка
+    const monthlyDelta = (c2.opMonth + c2.fixedYearly/12) - (c1.opMonth + c1.fixedYearly/12);
+    const purchaseDelta = c1.netPurchase - c2.netPurchase;
+    let beMonths = null;
+    let costlier = null; // кой е по-скъп при покупка
+    if (purchaseDelta > 0 && monthlyDelta > 0) {
+      beMonths = purchaseDelta / monthlyDelta;
+      costlier = 'v1';
+    } else if (purchaseDelta < 0 && monthlyDelta < 0) {
+      beMonths = (-purchaseDelta) / (-monthlyDelta);
+      costlier = 'v2';
+    }
+
+    return { c1, c2, kmYear, totalKm, monthlyDelta, purchaseDelta, beMonths, costlier };
+  }
+
+  // ============ РЕНДЕРИНГ НА КАРТИЧКИ / VEHICLE CARDS ============
+  function fuelTypeButtons(which) {
+    const v = state[which];
+    const types = [
+      {id:'diesel', cat:'ice'},
+      {id:'petrol', cat:'ice'},
+      {id:'cng', cat:'ice'},
+      {id:'lpg', cat:'ice'},
+      {id:'hybrid', cat:'ice'},
+      {id:'dieseladblue', cat:'ice'},
+      {id:'electric', cat:'ev'}
+    ];
+    return types.map(ft => {
+      const active = v.fuel === ft.id ? 'active' : '';
+      return `<button data-veh="${which}" data-fuel="${ft.id}" data-cat="${ft.cat}" class="${active}">${t(ft.id)}</button>`;
+    }).join('');
+  }
+
+  function consumptionLabel(v) {
+    if (v.type === 'ev') return t('consEv');
+    if (v.fuel === 'cng') return t('consCng');
+    if (v.fuel === 'lpg') return t('consLpg');
+    if (v.fuel === 'hybrid') return t('consHybridFuel'); // основното гориво на хибрида
+    return t('consIce');
+  }
+  function consumptionUnit(v) {
+    if (v.type === 'ev') return 'kWh/100' + t('kmUnit');
+    if (v.fuel === 'cng') return 'kg/100' + t('kmUnit');
+    return 'L/100' + t('kmUnit');
+  }
+  function consumptionStep(v) {
+    if (v.type === 'ev') return '1';
+    return '0.5';
+  }
+  // Втора консумация (само за LPG/Хибрид/Дизел+AdBlue)
+  function hasSecondary(v) {
+    return v.type !== 'ev' && (v.fuel === 'lpg' || v.fuel === 'hybrid' || v.fuel === 'dieseladblue');
+  }
+  function secondaryLabel(v) {
+    if (v.fuel === 'lpg') return t('consLpgSecondary');     // бензин в LPG автомобил
+    if (v.fuel === 'hybrid') return t('consHybridSecondary'); // ток в хибрид
+    if (v.fuel === 'dieseladblue') return t('consAdblueSecondary'); // AdBlue в дизел
+    return '';
+  }
+  function secondaryUnit(v) {
+    if (v.fuel === 'lpg') return 'L/100' + t('kmUnit');
+    if (v.fuel === 'hybrid') return 'kWh/100' + t('kmUnit');
+    if (v.fuel === 'dieseladblue') return 'L/1000' + t('kmUnit');
+    return '';
+  }
+  function secondaryStep(v) {
+    if (v.fuel === 'hybrid') return '1';
+    if (v.fuel === 'dieseladblue') return '0.1';
+    return '0.5';
+  }
+
+  function vehicleCard(which) {
+    const v = state[which];
+    const klass = which === 'v1' ? 'v1' : 'v2';
+    const badge = v.type === 'ev' ? t('ev') : t('ice');
+    const showSecondary = hasSecondary(v);
+    const showHybridBase = v.fuel === 'hybrid';
+    return `
+      <div class="vc-card ${klass}">
+        <span class="vc-badge ${klass}">${badge}</span>
+        <input type="text" class="vc-name-input" data-veh="${which}" data-field="name" value="${escapeHtml(v.name)}" aria-label="${t('vehicles')}">
+        <div style="font-size:12px;color:var(--color-text-tertiary);margin-bottom:6px">${t('pickFuel')}:</div>
+        <div class="vc-ftype">${fuelTypeButtons(which)}</div>
+
+        ${showHybridBase ? `
+        <div class="vc-input-row">
+          <label>${t('hybridBaseFuel')}</label>
+          <div style="display:flex;gap:5px">
+            <button data-veh="${which}" data-hybridbase="petrol" class="vc-hybrid-btn ${v.hybridBaseFuel==='petrol'?'active':''}">${t('petrol')}</button>
+            <button data-veh="${which}" data-hybridbase="diesel" class="vc-hybrid-btn ${v.hybridBaseFuel==='diesel'?'active':''}">${t('diesel')}</button>
+          </div>
+        </div>
+        ` : ''}
+
+        <div class="vc-input-row">
+          <label>${t('purchasePrice')}</label>
+          <input type="number" data-veh="${which}" data-field="purchase" value="${v.purchase}" min="0" step="1000">
+          <span class="vc-unit">€</span>
+        </div>
+        <div class="vc-input-row">
+          <label>${consumptionLabel(v)}</label>
+          <input type="number" data-veh="${which}" data-field="consumption" value="${v.consumption}" min="0" step="${consumptionStep(v)}">
+          <span class="vc-unit">${consumptionUnit(v)}</span>
+        </div>
+        ${showSecondary ? `
+        <div class="vc-input-row">
+          <label>${secondaryLabel(v)}</label>
+          <input type="number" data-veh="${which}" data-field="secondaryConsumption" value="${v.secondaryConsumption}" min="0" step="${secondaryStep(v)}">
+          <span class="vc-unit">${secondaryUnit(v)}</span>
+        </div>
+        ` : ''}
+        <div class="vc-input-row">
+          <label>${t('maint')}</label>
+          <input type="number" data-veh="${which}" data-field="maintPerYear" value="${v.maintPerYear}" min="0" step="100">
+          <span class="vc-unit">€${t('perYear')}</span>
+        </div>
+
+        <details class="vc-collapse" open>
+          <summary>${t('advanced')}</summary>
+          <div class="vc-input-row">
+            <label>${t('subsidy')}</label>
+            <input type="number" data-veh="${which}" data-field="subsidy" value="${v.subsidy}" min="0" step="500">
+            <span class="vc-unit">€</span>
+          </div>
+          <div class="vc-input-row">
+            <label>${t('insurance')}</label>
+            <input type="number" data-veh="${which}" data-field="insurance" value="${v.insurance}" min="0" step="50">
+            <span class="vc-unit">€${t('perYear')}</span>
+          </div>
+          <div class="vc-input-row">
+            <label>${t('roadTax')}</label>
+            <input type="number" data-veh="${which}" data-field="roadTax" value="${v.roadTax}" min="0" step="50">
+            <span class="vc-unit">€${t('perYear')}</span>
+          </div>
+          <div class="vc-input-row">
+            <label>${t('residual')}</label>
+            <input type="number" data-veh="${which}" data-field="residualPct" value="${v.residualPct}" min="0" max="100" step="1">
+            <span class="vc-unit">${t('ofPrice')}</span>
+          </div>
+        </details>
+      </div>
+    `;
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ============ ГЛОБАЛНИ ПЛЪЗГАЧИ / GLOBAL SLIDERS ============
+  function globalsHtml() {
+    const usesLpg = state.v1.fuel === 'lpg' || state.v2.fuel === 'lpg';
+    const usesCng = state.v1.fuel === 'cng' || state.v2.fuel === 'cng';
+    const usesAdblue = state.v1.fuel === 'dieseladblue' || state.v2.fuel === 'dieseladblue';
+    return `
+      <div class="vc-sl-row">
+        <span class="vc-sl-lbl">${t('kmMonth')}</span>
+        <input type="range" min="1000" max="30000" step="500" value="${state.km}" data-global="km">
+        <span class="vc-sl-val" id="km-out">${fmtKm(state.km)}</span>
+      </div>
+      <div class="vc-sl-row">
+        <span class="vc-sl-lbl">${t('fuelPrice')}</span>
+        <input type="range" min="0.50" max="3.50" step="0.05" value="${state.fuelPrice}" data-global="fuelPrice">
+        <span class="vc-sl-val" id="fp-out">${state.fuelPrice.toFixed(2)} ${t('lUnit')}</span>
+      </div>
+      ${usesLpg ? `
+      <div class="vc-sl-row">
+        <span class="vc-sl-lbl">${t('lpgPrice')}</span>
+        <input type="range" min="0.30" max="2.00" step="0.05" value="${state.lpgPrice}" data-global="lpgPrice">
+        <span class="vc-sl-val" id="lpg-out">${state.lpgPrice.toFixed(2)} ${t('lUnit')}</span>
+      </div>
+      ` : ''}
+      ${usesCng ? `
+      <div class="vc-sl-row">
+        <span class="vc-sl-lbl">${t('cngPrice')}</span>
+        <input type="range" min="0.50" max="3.00" step="0.05" value="${state.cngPrice}" data-global="cngPrice">
+        <span class="vc-sl-val" id="cng-out">${state.cngPrice.toFixed(2)} ${t('kgUnit')}</span>
+      </div>
+      ` : ''}
+      ${usesAdblue ? `
+      <div class="vc-sl-row">
+        <span class="vc-sl-lbl">${t('adbluePrice')}</span>
+        <input type="range" min="0.5" max="3.0" step="0.1" value="${state.adbluePrice}" data-global="adbluePrice">
+        <span class="vc-sl-val" id="ab-out">${state.adbluePrice.toFixed(2)} ${t('lUnit')}</span>
+      </div>
+      ` : ''}
+      <div class="vc-sl-row">
+        <span class="vc-sl-lbl">${t('elPrice')}</span>
+        <input type="range" min="0.1" max="5" step="0.05" value="${state.elPrice}" data-global="elPrice">
+        <span class="vc-sl-val" id="ep-out">${state.elPrice.toFixed(2)} ${t('mwhUnit')}</span>
+      </div>
+      <div class="vc-sl-row">
+        <span class="vc-sl-lbl">${t('years')}</span>
+        <input type="range" min="1" max="15" step="1" value="${state.years}" data-global="years">
+        <span class="vc-sl-val" id="yr-out">${state.years} ${t('yrUnit')}</span>
+      </div>
+    `;
+  }
+
+  // ============ РЕЗУЛТАТИ / METRICS, BREAK-EVEN, TOTALS ============
+  function metricsHtml(d) {
+    const c1 = d.c1, c2 = d.c2;
+    // Сравнение на общ месечен разход (гориво + поддръжка/застраховка/тол на месечна база)
+    const saveMonthly = c2.totalMonthly - c1.totalMonthly;
+    const v1Wins = d.c2.grandTotal > d.c1.grandTotal;
+    const totalDiff = Math.abs(c1.grandTotal - c2.grandTotal);
+    const winnerName = v1Wins ? state.v1.name : state.v2.name;
+    const loserSaveColor1 = saveMonthly > 0 ? '#5B8FBE' : '#C76A6A';
+    const totalColor = v1Wins ? '#5B8FBE' : '#7BA85A';
+
+    return `
+      <div class="vc-metric">
+        <div class="vc-metric-lbl">${state.v1.name}: ${t('opCostMonth')}</div>
+        <div class="vc-metric-val">${eur(c1.totalMonthly)}</div>
+        <div class="vc-metric-sub">${eur(c1.opMonth)} ${t('fuelShort')} + ${eur(c1.fixedYearly/12)} ${t('fixedShort')}</div>
+      </div>
+      <div class="vc-metric">
+        <div class="vc-metric-lbl">${state.v2.name}: ${t('opCostMonth')}</div>
+        <div class="vc-metric-val">${eur(c2.totalMonthly)}</div>
+        <div class="vc-metric-sub">${eur(c2.opMonth)} ${t('fuelShort')} + ${eur(c2.fixedYearly/12)} ${t('fixedShort')}</div>
+      </div>
+      <div class="vc-metric">
+        <div class="vc-metric-lbl">${t('saveMonth')}</div>
+        <div class="vc-metric-val" style="color:${loserSaveColor1}">${saveMonthly>=0?'+':''}${eur(saveMonthly)}</div>
+        <div class="vc-metric-sub">${saveMonthly>0 ? t('inFavor1')+' '+state.v1.name : t('inFavor2')+' '+state.v2.name}</div>
+      </div>
+      <div class="vc-metric">
+        <div class="vc-metric-lbl">${t('diff')} ${state.years} ${t('yrUnit')}</div>
+        <div class="vc-metric-val" style="color:${totalColor}">${eur(totalDiff)}</div>
+        <div class="vc-metric-sub">${winnerName} ${t('wins')}</div>
+      </div>
+    `;
+  }
+
+  function beHtml(d) {
+    if (d.beMonths !== null && isFinite(d.beMonths)) {
+      const bY = Math.floor(d.beMonths/12);
+      const bM = Math.round(d.beMonths%12);
+      const yr = bY > 0 ? `${bY} ${t('yrShort')} ` : '';
+      return `<div class="vc-be-box">
+        <div>
+          <div class="vc-be-lbl">${t('breakEven')}</div>
+          <div class="vc-be-big">${yr}${bM} ${t('moShort')}</div>
+          <div class="vc-be-sub">${Math.round(d.beMonths)} ${t('monthsToBE')}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="vc-be-lbl">${t('addInvest')}</div>
+          <div class="vc-be-big">${eur(Math.abs(d.purchaseDelta))}</div>
+          <div class="vc-be-sub">${t('priceDiff')}</div>
+        </div>
+      </div>`;
+    }
+    return `<div class="vc-be-box">
+      <div>
+        <div class="vc-be-lbl">${t('breakEven')}</div>
+        <div class="vc-be-big" style="color:#C76A6A">${t('notReached')}</div>
+        <div class="vc-be-sub">${t('atTheseFuel')}</div>
+      </div>
+    </div>`;
+  }
+
+  function totalsHtml(d) {
+    function card(which, c) {
+      const v = state[which];
+      const klass = which === 'v1' ? 'v1' : 'v2';
+      const consLabel = consumptionLabel(v);
+      const consUnit = consumptionUnit(v);
+      const fuelLabel = v.type === 'ev' ? t('elCost') : t('fuelCost');
+      const dualFuel = hasSecondary(v);
+      const secLabel = dualFuel ? secondaryLabel(v) : '';
+      const secUnit = dualFuel ? secondaryUnit(v) : '';
+      return `
+        <div class="vc-total-card ${klass}">
+          <span class="vc-badge ${klass}">${escapeHtml(v.name)}</span>
+          <div class="vc-summary-row"><span class="vc-summary-lbl">${consLabel}</span><span class="vc-summary-val">${v.consumption} ${consUnit}</span></div>
+          ${dualFuel ? `<div class="vc-summary-row"><span class="vc-summary-lbl">${secLabel}</span><span class="vc-summary-val">${v.secondaryConsumption} ${secUnit}</span></div>` : ''}
+          <div class="vc-summary-row"><span class="vc-summary-lbl">${fuelLabel}${t('perKm')}</span><span class="vc-summary-val">${ct(c.fuelKm)}${t('perKm')}</span></div>
+          <div class="vc-summary-row"><span class="vc-summary-lbl">${t('fuelMonthly')}</span><span class="vc-summary-val">${eur(c.opMonth)}</span></div>
+          <div class="vc-summary-row"><span class="vc-summary-lbl">${t('maintAnnual')}</span><span class="vc-summary-val">${eur(v.maintPerYear)}</span></div>
+          <div class="vc-summary-row"><span class="vc-summary-lbl">${t('insAnnual')}</span><span class="vc-summary-val">${eur(v.insurance)}</span></div>
+          <div class="vc-summary-row"><span class="vc-summary-lbl">${t('tollAnnual')}</span><span class="vc-summary-val">${eur(v.roadTax)}</span></div>
+          <div class="vc-summary-row"><span class="vc-summary-lbl">${t('opYears')} ${state.years} ${t('yrUnit')}</span><span class="vc-summary-val">${eur(c.opTotal + c.fixedTotal)}</span></div>
+          <div class="vc-summary-row"><span class="vc-summary-lbl">${t('netPurchase')}</span><span class="vc-summary-val">${eur(c.netPurchase)}</span></div>
+          <div class="vc-summary-row"><span class="vc-summary-lbl">${t('residualEnd')}</span><span class="vc-summary-val">−${eur(c.residualValue)}</span></div>
+          <div class="vc-summary-row" style="border-top:1px solid var(--color-border-secondary);margin-top:4px;padding-top:10px">
+            <span class="vc-summary-lbl" style="font-weight:500">${t('grandTotal')} ${state.years} ${t('yrUnit')}</span>
+            <span class="vc-summary-val" style="font-size:15px">${eur(c.grandTotal)}</span>
+          </div>
+        </div>
+      `;
+    }
+    return card('v1', d.c1) + card('v2', d.c2);
+  }
+
+  function legendHtml() {
+    return `
+      <div class="vc-legend-item"><span class="vc-legend-line v1"></span>${escapeHtml(state.v1.name)}</div>
+      <div class="vc-legend-item"><span class="vc-legend-line v2"></span>${escapeHtml(state.v2.name)}</div>
+    `;
+  }
+
+  function winnerHtml(d) {
+    const v1Wins = d.c2.grandTotal > d.c1.grandTotal;
+    const winner = v1Wins ? state.v1 : state.v2;
+    const klass = v1Wins ? 'w1' : 'w2';
+    const icon = winner.type === 'ev' ? '⚡' : '⛽';
+    const diff = Math.abs(d.c1.grandTotal - d.c2.grandTotal);
+    return `<div class="vc-winner ${klass}">
+      <span style="font-size:16px">${icon}</span>
+      <span>${state.years} ${t('yrUnit')} · ${fmtKm(state.km)}${t('perMonth')} — <strong>${escapeHtml(winner.name)} ${t('moreFavorable')}</strong> ${eur(diff)}</span>
+    </div>`;
+  }
+
+  // ============ ГРАФИКА / CHART ============
+  let chart = null;
+
+  // Помощник: създава вертикален градиент за областта под линията
+  // Helper: builds a vertical gradient for the area fill under a line
+  function makeAreaGradient(ctx, chartArea, hex) {
+    if (!chartArea) return 'rgba(0,0,0,0)';
+    const g = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+    // hex like '#5B8FBE' → rgba steps
+    const r = parseInt(hex.slice(1,3),16), gC = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    g.addColorStop(0,    `rgba(${r},${gC},${b},0.28)`);
+    g.addColorStop(0.55, `rgba(${r},${gC},${b},0.08)`);
+    g.addColorStop(1,    `rgba(${r},${gC},${b},0.00)`);
+    return g;
+  }
+
+  function renderChart(d) {
+    const labels = [];
+    const series1 = [];
+    const series2 = [];
+    const totalMonths = state.years * 12;
+    for (let m = 0; m <= totalMonths; m++) {
+      if (m === 0) {
+        labels.push(t('start'));
+      } else if (m % 12 === 0) {
+        labels.push(t('yearShort') + ' ' + (m / 12));
+      } else {
+        labels.push('');
+      }
+      const yFrac = m / 12;
+      const fracResidual1 = (m === totalMonths) ? d.c1.residualValue : 0;
+      const fracResidual2 = (m === totalMonths) ? d.c2.residualValue : 0;
+      series1.push(Math.round(d.c1.netPurchase + d.c1.opKm * d.kmYear * yFrac + d.c1.fixedYearly * yFrac - fracResidual1));
+      series2.push(Math.round(d.c2.netPurchase + d.c2.opKm * d.kmYear * yFrac + d.c2.fixedYearly * yFrac - fracResidual2));
+    }
+
+    if (chart) chart.destroy();
+    const canvas = document.getElementById('costChart');
+    if (!canvas) return;
+    const ctx2d = canvas.getContext('2d');
+
+    // Използваме каноничната стойност от calc() (същата като в карта break-even)
+    // Use the canonical value from calc() — same as the break-even card
+    const beMonths = (d.beMonths !== null && isFinite(d.beMonths)) ? d.beMonths : null;
+    const inRange = beMonths !== null && beMonths > 0 && beMonths < totalMonths;
+
+    // Persistent (per-call) plugin: draws crosshair on hover and break-even marker
+    const overlayPlugin = {
+      id: 'vcOverlay',
+      afterDatasetsDraw(c) {
+        const {ctx, chartArea, scales} = c;
+        if (!chartArea) return;
+
+        // Break-even вертикална линия (ако се случва в диапазона)
+        if (inRange) {
+          const xPx = scales.x.getPixelForValue(beMonths);
+          ctx.save();
+          ctx.strokeStyle = 'rgba(120,108,150,0.55)';
+          ctx.setLineDash([4,4]);
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(xPx, chartArea.top);
+          ctx.lineTo(xPx, chartArea.bottom);
+          ctx.stroke();
+
+          // Точка на пресичане — интерполираме series1 при beMonths
+          // (series1 и series2 се пресичат тук аналитично)
+          const lo = Math.floor(beMonths), hi = Math.min(Math.ceil(beMonths), series1.length - 1);
+          const frac = beMonths - lo;
+          const yVal = series1[lo] + (series1[hi] - series1[lo]) * frac;
+          const yPx = scales.y.getPixelForValue(yVal);
+          ctx.setLineDash([]);
+          ctx.fillStyle = '#fff';
+          ctx.strokeStyle = '#7B6C96';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(xPx, yPx, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // Етикет "Break-even · Y yr M mo" — същият формат като карта
+          // Label "Break-even · Y yr M mo" — same format as card
+          const bY = Math.floor(beMonths / 12);
+          const bM = Math.round(beMonths % 12);
+          const yrPart = bY > 0 ? (bY + ' ' + t('yrShort') + ' ') : '';
+          const beLabel = (lang === 'bg' ? 'Изравняване' : 'Break-even') + ' · ' + yrPart + bM + ' ' + t('moShort');
+          ctx.font = '600 11px Barlow, system-ui, sans-serif';
+          const textW = ctx.measureText(beLabel).width;
+          // Поставяме етикета така, че да не излиза извън графиката
+          let lx = xPx + 8;
+          if (lx + textW + 10 > chartArea.right) lx = xPx - textW - 18;
+          const ly = chartArea.top + 6;
+          ctx.fillStyle = 'rgba(123,108,150,0.95)';
+          ctx.beginPath();
+          if (ctx.roundRect) {
+            ctx.roundRect(lx, ly, textW + 12, 18, 4);
+          } else {
+            ctx.rect(lx, ly, textW + 12, 18);
+          }
+          ctx.fill();
+          ctx.fillStyle = '#fff';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(beLabel, lx + 6, ly + 9);
+          ctx.restore();
+        }
+
+        // Вертикална линия на курсора (crosshair)
+        const active = c.tooltip && c.tooltip.getActiveElements && c.tooltip.getActiveElements();
+        if (active && active.length) {
+          const xPx = active[0].element.x;
+          ctx.save();
+          ctx.strokeStyle = 'rgba(80,70,110,0.22)';
+          ctx.setLineDash([3,3]);
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(xPx, chartArea.top);
+          ctx.lineTo(xPx, chartArea.bottom);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+    };
+
+    chart = new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: state.v1.name,
+            data: series1,
+            borderColor: '#5B8FBE',
+            backgroundColor: (c) => makeAreaGradient(ctx2d, c.chart.chartArea, '#5B8FBE'),
+            fill: true,
+            tension: 0.28,
+            pointRadius: 0,
+            pointHoverRadius: 6,
+            pointHoverBackgroundColor: '#5B8FBE',
+            pointHoverBorderColor: '#fff',
+            pointHoverBorderWidth: 2.5,
+            borderWidth: 3
+          },
+          {
+            label: state.v2.name,
+            data: series2,
+            borderColor: '#7BA85A',
+            backgroundColor: (c) => makeAreaGradient(ctx2d, c.chart.chartArea, '#7BA85A'),
+            fill: true,
+            tension: 0.28,
+            pointRadius: 0,
+            pointHoverRadius: 6,
+            pointHoverBackgroundColor: '#7BA85A',
+            pointHoverBorderColor: '#fff',
+            pointHoverBorderWidth: 2.5,
+            borderWidth: 3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        animation: { duration: 350, easing: 'easeOutCubic' },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(40, 32, 60, 0.94)',
+            titleColor: '#fff',
+            titleFont: { size: 12, weight: '600' },
+            bodyColor: '#E8E3F0',
+            bodyFont: { size: 12 },
+            padding: 10,
+            cornerRadius: 8,
+            displayColors: true,
+            boxWidth: 8,
+            boxHeight: 8,
+            boxPadding: 4,
+            usePointStyle: true,
+            callbacks: {
+              title: items => {
+                const m = items[0].dataIndex;
+                if (m === 0) return t('start');
+                const yr = Math.floor(m / 12);
+                const mo = m % 12;
+                if (yr === 0) return mo + ' ' + t('moShort');
+                if (mo === 0) return yr + ' ' + t('yrShort');
+                return yr + ' ' + t('yrShort') + ' ' + mo + ' ' + t('moShort');
+              },
+              label: c => '  ' + c.dataset.label + ': ' + Math.round(c.parsed.y).toLocaleString(locale()) + ' €',
+              afterBody: items => {
+                if (items.length < 2) return '';
+                const a = items[0].parsed.y, b = items[1].parsed.y;
+                const diff = Math.abs(a - b);
+                const leader = a < b ? items[0].dataset.label : items[1].dataset.label;
+                const diffLbl = lang === 'bg' ? 'Разлика' : 'Difference';
+                return ['', diffLbl + ': ' + Math.round(diff).toLocaleString(locale()) + ' € (' + leader + ')'];
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            ticks: { callback: v => (v/1000).toFixed(0) + 'k €', font:{size:11}, color:'#7B7290' },
+            grid: { color: 'rgba(120,108,150,0.10)', drawTicks:false },
+            border: { display:false }
+          },
+          x: {
+            ticks: {
+              font:{size:11},
+              color:'#7B7290',
+              autoSkip:false,
+              maxRotation:0,
+              callback: function(value) {
+                const lbl = this.getLabelForValue(value);
+                return lbl === '' ? null : lbl;
+              }
+            },
+            grid: { display:false },
+            border: { color: 'rgba(120,108,150,0.18)' }
+          }
+        }
+      },
+      plugins: [overlayPlugin]
+    });
+    canvas.setAttribute('aria-label', t('ariaChart'));
+  }
+
+  // ============ ОСНОВНО РЕНДЕРИРАНЕ / MAIN RENDER ============
+  function renderAll() {
+    document.getElementById('lblVehicles').textContent = t('vehicles');
+    document.getElementById('lblParams').textContent = t('params');
+    document.getElementById('lblResults').textContent = t('results');
+    document.getElementById('srTitle').textContent =
+      lang === 'bg'
+        ? 'Универсален финансов калкулатор за сравнение на две превозни средства'
+        : 'Universal Financial Comparison Calculator for Two Vehicles';
+
+    document.getElementById('vehicleCards').innerHTML = vehicleCard('v1') + vehicleCard('v2');
+    document.getElementById('globals').innerHTML = globalsHtml();
+
+    const d = calc();
+    document.getElementById('metrics').innerHTML = metricsHtml(d);
+    document.getElementById('beArea').innerHTML = beHtml(d);
+    document.getElementById('totals').innerHTML = totalsHtml(d);
+    document.getElementById('legend').innerHTML = legendHtml();
+    document.getElementById('winnerArea').innerHTML = winnerHtml(d);
+    renderChart(d);
+
+    // Sync share button label to active language
+    const sbl = document.getElementById('shareBtnLbl');
+    if (sbl && !document.getElementById('shareBtn').classList.contains('copied')) {
+      sbl.textContent = t('share');
+    }
+
+    attachInputHandlers();
+    scheduleUrlUpdate();
+  }
+
+  // ============ ОБРАБОТКА НА ВЪВЕЖДАНЕ / INPUT HANDLERS ============
+  function attachInputHandlers() {
+    // Имена на превозни средства и числа в карти
+    document.querySelectorAll('input[data-veh]').forEach(inp => {
+      inp.addEventListener('input', e => {
+        const veh = e.target.dataset.veh;
+        const field = e.target.dataset.field;
+        if (field === 'name') {
+          state[veh][field] = e.target.value;
+          // Лек ре-рендер само за зависими секции (без да губим фокуса)
+          partialRender();
+        } else {
+          const val = parseFloat(e.target.value);
+          if (!isNaN(val)) {
+            state[veh][field] = val;
+            partialRender();
+          }
+        }
+      });
+    });
+
+    // Бутони за тип гориво
+    document.querySelectorAll('button[data-fuel]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const veh = e.currentTarget.dataset.veh;
+        const fuel = e.currentTarget.dataset.fuel;
+        const cat = e.currentTarget.dataset.cat;
+        const v = state[veh];
+        const oldType = v.type;
+        const oldFuel = v.fuel;
+        v.fuel = fuel;
+        v.type = cat;
+        // Задаваме разумни стойности по подразбиране при смяна
+        if (oldType !== cat || oldFuel !== fuel) {
+          if (cat === 'ev') {
+            v.consumption = 22; // 130 kWh/100км типично за камион; за кола ~18-22
+            v.secondaryConsumption = 0;
+          } else if (fuel === 'lpg') {
+            v.consumption = 12;            // LPG л/100км (типично за лек автомобил)
+            v.secondaryConsumption = 0.5;  // пилотен бензин
+          } else if (fuel === 'hybrid') {
+            v.consumption = 5;             // бензин л/100км
+            v.secondaryConsumption = 8;    // ток kWh/100км
+          } else if (fuel === 'dieseladblue') {
+            v.consumption = 7;             // дизел л/100км
+            v.secondaryConsumption = 1.5;  // AdBlue л/1000км
+          } else if (fuel === 'cng') {
+            v.consumption = 8;             // кг/100км
+            v.secondaryConsumption = 0;
+          } else {
+            // дизел / бензин
+            v.consumption = (oldType === 'ev') ? 7 : v.consumption;
+            v.secondaryConsumption = 0;
+          }
+        }
+        renderAll();
+      });
+    });
+
+    // Бутони за основно гориво на хибрид
+    document.querySelectorAll('button[data-hybridbase]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const veh = e.currentTarget.dataset.veh;
+        const base = e.currentTarget.dataset.hybridbase;
+        state[veh].hybridBaseFuel = base;
+        renderAll();
+      });
+    });
+
+    // Глобални плъзгачи
+    document.querySelectorAll('input[data-global]').forEach(inp => {
+      inp.addEventListener('input', e => {
+        const f = e.target.dataset.global;
+        state[f] = parseFloat(e.target.value);
+        partialRender();
+      });
+    });
+  }
+
+  function partialRender() {
+    // Опресняване на стойностите на плъзгачите
+    const kmOut = document.getElementById('km-out');
+    const fpOut = document.getElementById('fp-out');
+    const epOut = document.getElementById('ep-out');
+    const yrOut = document.getElementById('yr-out');
+    const lpgOut = document.getElementById('lpg-out');
+    const cngOut = document.getElementById('cng-out');
+    const abOut = document.getElementById('ab-out');
+    if (kmOut) kmOut.textContent = fmtKm(state.km);
+    if (fpOut) fpOut.textContent = state.fuelPrice.toFixed(2) + ' ' + t('lUnit');
+    if (epOut) epOut.textContent = state.elPrice.toFixed(2) + ' ' + t('mwhUnit');
+    if (yrOut) yrOut.textContent = state.years + ' ' + t('yrUnit');
+    if (lpgOut) lpgOut.textContent = state.lpgPrice.toFixed(2) + ' ' + t('lUnit');
+    if (cngOut) cngOut.textContent = state.cngPrice.toFixed(2) + ' ' + t('kgUnit');
+    if (abOut) abOut.textContent = state.adbluePrice.toFixed(2) + ' ' + t('lUnit');
+
+    const d = calc();
+    document.getElementById('metrics').innerHTML = metricsHtml(d);
+    document.getElementById('beArea').innerHTML = beHtml(d);
+    document.getElementById('totals').innerHTML = totalsHtml(d);
+    document.getElementById('legend').innerHTML = legendHtml();
+    document.getElementById('winnerArea').innerHTML = winnerHtml(d);
+    renderChart(d);
+    scheduleUrlUpdate();
+  }
+
+  // ============ URL СПОДЕЛЯНЕ / URL SHARING ============
+  // Кратки ключове за компактни URL адреси
+  // Short keys to keep URLs compact
+  const URL_KEYS = {
+    // per-vehicle fields → 2-letter suffix
+    name:'n', type:'t', fuel:'f', hybridBaseFuel:'hb',
+    purchase:'p', subsidy:'s', consumption:'c', secondaryConsumption:'sc',
+    maintPerYear:'m', insurance:'i', roadTax:'rt', residualPct:'r',
+    // globals
+    km:'km', fuelPrice:'fp', lpgPrice:'lp', cngPrice:'cp', adbluePrice:'ap', elPrice:'ep', years:'y',
+    lang:'l'
+  };
+
+  function encodeStateToUrl() {
+    const params = new URLSearchParams();
+    const writeVeh = (prefix, v) => {
+      Object.keys(v).forEach(k => {
+        const short = URL_KEYS[k];
+        if (!short) return;
+        const val = v[k];
+        if (val === undefined || val === null || val === '') return;
+        params.set(prefix + short, String(val));
+      });
+    };
+    writeVeh('1', state.v1);
+    writeVeh('2', state.v2);
+    ['km','fuelPrice','lpgPrice','cngPrice','adbluePrice','elPrice','years'].forEach(k => {
+      params.set(URL_KEYS[k], String(state[k]));
+    });
+    params.set(URL_KEYS.lang, lang);
+    const qs = params.toString();
+    const newUrl = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
+    try { history.replaceState(null, '', newUrl); } catch (_) { /* sandboxed iframes may block */ }
+  }
+
+  function decodeStateFromUrl() {
+    let params;
+    try { params = new URLSearchParams(window.location.search); }
+    catch (_) { return; }
+    if (!params || ![...params.keys()].length) return;
+
+    const numFields = new Set(['purchase','subsidy','consumption','secondaryConsumption',
+      'maintPerYear','insurance','roadTax','residualPct',
+      'km','fuelPrice','lpgPrice','cngPrice','adbluePrice','elPrice','years']);
+
+    const readVeh = (prefix, v) => {
+      Object.keys(URL_KEYS).forEach(k => {
+        if (!(k in v)) return;
+        const short = URL_KEYS[k];
+        const raw = params.get(prefix + short);
+        if (raw === null) return;
+        if (numFields.has(k)) {
+          const n = parseFloat(raw);
+          if (!isNaN(n)) v[k] = n;
+        } else {
+          v[k] = raw;
+        }
+      });
+    };
+    readVeh('1', state.v1);
+    readVeh('2', state.v2);
+
+    ['km','fuelPrice','lpgPrice','cngPrice','adbluePrice','elPrice','years'].forEach(k => {
+      const raw = params.get(URL_KEYS[k]);
+      if (raw === null) return;
+      const n = parseFloat(raw);
+      if (!isNaN(n)) state[k] = n;
+    });
+
+    const langRaw = params.get(URL_KEYS.lang);
+    if (langRaw === 'bg' || langRaw === 'en') lang = langRaw;
+  }
+
+  // Дебоунс — пишем URL не по-често от 1 път на 250мс
+  // Debounce — write URL at most every 250ms
+  let urlTimer = null;
+  function scheduleUrlUpdate() {
+    if (urlTimer) clearTimeout(urlTimer);
+    urlTimer = setTimeout(encodeStateToUrl, 250);
+  }
+
+  // ============ ПРЕВКЛЮЧВАТЕЛ НА ЕЗИК / LANGUAGE TOGGLE ============
+  document.querySelectorAll('.vc-lang button').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const newLang = e.currentTarget.dataset.lang;
+      if (newLang === lang) return;
+      lang = newLang;
+      document.querySelectorAll('.vc-lang button').forEach(b => {
+        const act = b.dataset.lang === lang;
+        b.classList.toggle('active', act);
+        b.setAttribute('aria-pressed', act ? 'true' : 'false');
+      });
+      // Ако имената са били оставени по подразбиране — обнови ги
+      if (state.v1.name === T.bg.v1Default || state.v1.name === T.en.v1Default) state.v1.name = t('v1Default');
+      if (state.v2.name === T.bg.v2Default || state.v2.name === T.en.v2Default) state.v2.name = t('v2Default');
+      renderAll();
+    });
+  });
+
+  // ============ ИНИЦИАЛИЗАЦИЯ / INIT ============
+  // Прочети състоянието от URL (ако има), след това попълни имена по подразбиране
+  // Read state from URL (if any), then fill default names
+  decodeStateFromUrl();
+
+  // Sync language toggle UI to decoded language
+  document.querySelectorAll('.vc-lang button').forEach(b => {
+    const act = b.dataset.lang === lang;
+    b.classList.toggle('active', act);
+    b.setAttribute('aria-pressed', act ? 'true' : 'false');
+  });
+
+  if (!state.v1.name) state.v1.name = t('v1Default');
+  if (!state.v2.name) state.v2.name = t('v2Default');
+
+  // Бутон за споделяне — копира текущия URL в клипборда
+  // Share button — copies current URL to clipboard
+  const shareBtn = document.getElementById('shareBtn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async () => {
+      // Принудително синхронизиране, в случай че има висящ дебоунс
+      if (urlTimer) { clearTimeout(urlTimer); urlTimer = null; }
+      encodeStateToUrl();
+      const url = window.location.href;
+      const lbl = document.getElementById('shareBtnLbl');
+      const showCopied = () => {
+        shareBtn.classList.add('copied');
+        if (lbl) lbl.textContent = t('shareCopied');
+        setTimeout(() => {
+          shareBtn.classList.remove('copied');
+          if (lbl) lbl.textContent = t('share');
+        }, 1800);
+      };
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(url);
+          showCopied();
+        } else {
+          // Резервен метод — стар подход през textarea
+          const ta = document.createElement('textarea');
+          ta.value = url;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          showCopied();
+        }
+      } catch (_) {
+        // Ако всичко друго се провали — покажи URL за ръчно копиране
+        window.prompt('Copy share link:', url);
+      }
+    });
+  }
+
+  renderAll();
+})();
+</script>
