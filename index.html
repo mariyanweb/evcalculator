@@ -651,7 +651,7 @@
       consAdblueSecondary:'Разход AdBlue (л/1000км)',
       hybridBaseFuel:'Гориво на хибрида',
       lpgPrice:'Цена LPG', cngPrice:'Цена CNG', adbluePrice:'Цена AdBlue',
-      maint:'Поддръжка', insurance:'Застраховка', roadTax:'Винетка / тол', vehicleTax:'Данък МПС',
+      maint:'Поддръжка', insurance:'Застраховка', roadTax:'Винетка / тол', vehicleTax:'Данък МПС', chargerInstall:'Инсталация на зарядно',
       residual:'Остатъчна стойност',
       kmMonth:'Километри / месец', fuelPrice:'Цена гориво', elPrice:'Цена ток', years:'Години на ползване',
       kmUnit:'км', lUnit:'€/л', kgUnit:'€/кг', mwhUnit:'€/kWh', yrUnit:'год.',
@@ -686,7 +686,7 @@
       consAdblueSecondary:'AdBlue consumption (L/1000km)',
       hybridBaseFuel:'Hybrid fuel type',
       lpgPrice:'LPG price', cngPrice:'CNG price', adbluePrice:'AdBlue price',
-      maint:'Maintenance', insurance:'Insurance', roadTax:'Road toll / vignette', vehicleTax:'Vehicle tax',
+      maint:'Maintenance', insurance:'Insurance', roadTax:'Road toll / vignette', vehicleTax:'Vehicle tax', chargerInstall:'Charger installation',
       residual:'Residual value',
       kmMonth:'Kilometers / month', fuelPrice:'Fuel price', elPrice:'Electricity price', years:'Years of use',
       kmUnit:'km', lUnit:'€/L', kgUnit:'€/kg', mwhUnit:'€/kWh', yrUnit:'yr',
@@ -737,6 +737,7 @@
       insurance: 1800,
       roadTax: 49.6,
       vehicleTax: 150,
+      chargerInstall: 0,
       residualPct: 30
     },
     v2: {
@@ -752,6 +753,7 @@
       insurance: 2100,
       roadTax: 49.6,
       vehicleTax: 0,
+      chargerInstall: 0,
       residualPct: 20
     },
     km: 2500,
@@ -820,12 +822,15 @@
       const fixedYearly = v.insurance + v.roadTax + v.vehicleTax + v.maintPerYear;
       const fixedTotal = fixedYearly * state.years;
       const opTotal = fuelKm * totalKm;
-      const netPurchase = v.purchase - v.subsidy;
+      // Зарядно устройство — еднократен разход, само за EV/Хибрид (остава с дома, без остатъчна стойност)
+      // Charger installation — one-time cost, EV/Hybrid only (stays with the home, no residual)
+      const chargerCost = (v.type === 'ev' || v.fuel === 'hybrid') ? (v.chargerInstall || 0) : 0;
+      const netPurchase = v.purchase - v.subsidy + chargerCost;
       const residualValue = v.purchase * (v.residualPct / 100);
       const grandTotal = netPurchase + opTotal + fixedTotal - residualValue;
       // Показваме общ месечен разход (гориво + дял от фиксираните) за по-смислено сравнение
       const totalMonthly = opMonth + fixedYearly / 12;
-      return { fuel, fuelKm, opKm, opMonth, opYearly, fixedYearly, fixedTotal, opTotal, totalMonthly, netPurchase, residualValue, grandTotal };
+      return { fuel, fuelKm, opKm, opMonth, opYearly, fixedYearly, fixedTotal, opTotal, totalMonthly, netPurchase, residualValue, grandTotal, chargerCost };
     }
 
     const c1 = vehicleCalc(state.v1);
@@ -909,6 +914,7 @@
     const badge = v.type === 'ev' ? t('ev') : t('ice');
     const showSecondary = hasSecondary(v);
     const showHybridBase = v.fuel === 'hybrid';
+    const showCharger = v.type === 'ev' || v.fuel === 'hybrid';
     return `
       <div class="vc-card ${klass}">
         <span class="vc-badge ${klass}">${badge}</span>
@@ -956,6 +962,13 @@
             <input type="number" data-veh="${which}" data-field="subsidy" value="${v.subsidy}" min="0" step="500">
             <span class="vc-unit">€</span>
           </div>
+          ${showCharger ? `
+          <div class="vc-input-row">
+            <label>${t('chargerInstall')}</label>
+            <input type="number" data-veh="${which}" data-field="chargerInstall" value="${v.chargerInstall}" min="0" step="100">
+            <span class="vc-unit">€</span>
+          </div>
+          ` : ''}
           <div class="vc-input-row">
             <label>${t('insurance')}</label>
             <input type="number" data-veh="${which}" data-field="insurance" value="${v.insurance}" min="0" step="50">
@@ -1119,6 +1132,7 @@
           <div class="vc-summary-row"><span class="vc-summary-lbl">${t('tollAnnual')}</span><span class="vc-summary-val">${eur(v.roadTax)}</span></div>
           <div class="vc-summary-row"><span class="vc-summary-lbl">${t('vehicleTaxAnnual')}</span><span class="vc-summary-val">${eur(v.vehicleTax)}</span></div>
           <div class="vc-summary-row"><span class="vc-summary-lbl">${t('opYears')} ${state.years} ${t('yrUnit')}</span><span class="vc-summary-val">${eur(c.opTotal + c.fixedTotal)}</span></div>
+          ${c.chargerCost > 0 ? `<div class="vc-summary-row"><span class="vc-summary-lbl">${t('chargerInstall')}</span><span class="vc-summary-val">${eur(c.chargerCost)}</span></div>` : ''}
           <div class="vc-summary-row"><span class="vc-summary-lbl">${t('netPurchase')}</span><span class="vc-summary-val">${eur(c.netPurchase)}</span></div>
           <div class="vc-summary-row"><span class="vc-summary-lbl">${t('residualEnd')}</span><span class="vc-summary-val">−${eur(c.residualValue)}</span></div>
           <div class="vc-summary-row" style="border-top:1px solid var(--color-border-secondary);margin-top:4px;padding-top:10px">
@@ -1521,7 +1535,7 @@
     // per-vehicle fields → 2-letter suffix
     name:'n', type:'t', fuel:'f', hybridBaseFuel:'hb',
     purchase:'p', subsidy:'s', consumption:'c', secondaryConsumption:'sc',
-    maintPerYear:'m', insurance:'i', roadTax:'rt', vehicleTax:'vt', residualPct:'r',
+    maintPerYear:'m', insurance:'i', roadTax:'rt', vehicleTax:'vt', chargerInstall:'ci', residualPct:'r',
     // globals
     km:'km', fuelPrice:'fp', lpgPrice:'lp', cngPrice:'cp', adbluePrice:'ap', elPrice:'ep', years:'y',
     lang:'l'
@@ -1556,7 +1570,7 @@
     if (!params || ![...params.keys()].length) return;
 
     const numFields = new Set(['purchase','subsidy','consumption','secondaryConsumption',
-      'maintPerYear','insurance','roadTax','vehicleTax','residualPct',
+      'maintPerYear','insurance','roadTax','vehicleTax','chargerInstall','residualPct',
       'km','fuelPrice','lpgPrice','cngPrice','adbluePrice','elPrice','years']);
 
     const readVeh = (prefix, v) => {
