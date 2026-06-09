@@ -1,17 +1,25 @@
-<h2 id="srTitle" style="font-family:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;text-align:center;font-size:24px;font-weight:600;color:var(--color-text-primary);margin:0 0 24px;letter-spacing:.04em;text-transform:uppercase;max-width:920px;margin-left:auto;margin-right:auto">Universal Financial Comparison Calculator for Two Vehicles</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vehicle Cost Comparison</title>
+</head>
+<body>
+<h2 id="srTitle" style="font-family:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;text-align:center;font-size:24px;font-weight:600;color:var(--color-text-primary);margin:0 0 24px;letter-spacing:.04em;text-transform:uppercase;max-width:920px;margin-left:auto;margin-right:auto">Vehicle Cost Comparison</h2>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap');
 
 .vc-wrap{
   padding:1rem 0;
-  font-family:'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family:'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
   max-width:920px;
   margin:0 auto;
   color:var(--color-text-primary);
 }
 .vc-wrap input,.vc-wrap button,.vc-wrap select,.vc-wrap textarea{
-  font-family:'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family:'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 .vc-wrap input[type="number"],
 .vc-wrap .vc-summary-val,
@@ -1250,7 +1258,7 @@
           const bM = Math.round(beMonths % 12);
           const yrPart = bY > 0 ? (bY + ' ' + t('yrShort') + ' ') : '';
           const beLabel = (lang === 'bg' ? 'Изравняване' : 'Break-even') + ' · ' + yrPart + bM + ' ' + t('moShort');
-          ctx.font = '600 11px Barlow, system-ui, sans-serif';
+          ctx.font = '600 11px Manrope, system-ui, sans-serif';
           const textW = ctx.measureText(beLabel).width;
           // Поставяме етикета така, че да не излиза извън графиката
           let lx = xPx + 8;
@@ -1398,8 +1406,8 @@
     document.getElementById('lblResults').textContent = t('results');
     document.getElementById('srTitle').textContent =
       lang === 'bg'
-        ? 'Универсален финансов калкулатор за сравнение на две превозни средства'
-        : 'Universal Financial Comparison Calculator for Two Vehicles';
+        ? 'Сравнение на разходи'
+        : 'Vehicle Cost Comparison';
 
     document.getElementById('vehicleCards').innerHTML = vehicleCard('v1') + vehicleCard('v2');
     document.getElementById('globals').innerHTML = globalsHtml();
@@ -1686,3 +1694,6 @@
   renderAll();
 })();
 </script>
+
+</body>
+</html>
