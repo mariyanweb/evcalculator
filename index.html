@@ -876,6 +876,9 @@ button,input,select{font:inherit;color:inherit}
     return pts;
   }
 
+  const END_FONT = '600 11px "IBM Plex Sans", system-ui, sans-serif';
+  const END_OFFSET = 10;
+
   const overlayPlugin = {
     id: 'vcOverlay',
     afterDatasetsDraw(c) {
@@ -908,6 +911,50 @@ button,input,select{font:inherit;color:inherit}
         ctx.restore();
       }
 
+      // Крайни точки след препродажбата: точка + етикет с крайната стойност
+      // End points after resale: dot + label with the final value
+      const ends = [];
+      c.data.datasets.forEach((ds, i) => {
+        const meta = c.getDatasetMeta(i);
+        if (!meta || meta.hidden || !meta.data.length || !ds.data.length) return;
+        const pt = meta.data[meta.data.length - 1];
+        ends.push({x: pt.x, y: pt.y, ly: pt.y, color: ds.borderColor, val: ds.data[ds.data.length - 1].y});
+      });
+      if (ends.length === 2) {
+        const [hi, lo] = ends[0].y <= ends[1].y ? [ends[0], ends[1]] : [ends[1], ends[0]];
+        const gap = 22;
+        if (lo.ly - hi.ly < gap) {
+          const mid = (hi.y + lo.y) / 2;
+          hi.ly = mid - gap / 2;
+          lo.ly = mid + gap / 2;
+        }
+      }
+      ctx.save();
+      ctx.font = END_FONT;
+      ctx.textBaseline = 'middle';
+      ends.forEach(e => {
+        e.ly = Math.max(chartArea.top + 10, Math.min(chartArea.bottom - 10, e.ly));
+        const label = eur0(e.val);
+        const w = ctx.measureText(label).width + 12;
+        const lx = e.x + END_OFFSET;
+        // Свързваща линия / connector
+        ctx.strokeStyle = e.color; ctx.lineWidth = 1.5; ctx.setLineDash([]);
+        ctx.beginPath(); ctx.moveTo(e.x, e.y);
+        if (Math.abs(e.ly - e.y) > 1) ctx.lineTo(lx - 4, e.ly);
+        ctx.lineTo(lx, e.ly); ctx.stroke();
+        // Точка / dot
+        ctx.fillStyle = e.color; ctx.strokeStyle = panel; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(e.x, e.y, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        // Етикет / label pill
+        ctx.fillStyle = e.color;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(lx, e.ly - 10, w, 20, 4); else ctx.rect(lx, e.ly - 10, w, 20);
+        ctx.fill();
+        ctx.fillStyle = panel;
+        ctx.fillText(label, lx + 6, e.ly + 0.5);
+      });
+      ctx.restore();
+
       // Курсор / crosshair
       const act = c.tooltip && c.tooltip.getActiveElements && c.tooltip.getActiveElements();
       if (act && act.length) {
@@ -931,14 +978,20 @@ button,input,select{font:inherit;color:inherit}
     return s;
   }
 
+  // Последният сегмент (спадът от препродажбата) е пунктиран
+  // The last segment (the resale drop) is dashed
+  const resaleDash = ctx => (ctx.p1DataIndex === chartState.months + 1 ? [4, 3] : undefined);
+
   function initChart() {
     if (typeof Chart === 'undefined') { $('chartBlock').style.display = 'none'; return; }
     Chart.defaults.font.family = '"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif';
     chart = new Chart($('costChart'), {
       type: 'line',
       data: { datasets: [
-        { label: '', data: [], borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, tension: 0, fill: false },
+        { label: '', data: [], borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, tension: 0, fill: false,
+          segment: { borderDash: resaleDash } },
         { label: '', data: [], borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, tension: 0,
+          segment: { borderDash: resaleDash },
           fill: { target: 0, above: 'transparent', below: 'transparent' } }
       ]},
       options: {
@@ -947,6 +1000,7 @@ button,input,select{font:inherit;color:inherit}
         parsing: false,
         interaction: { mode: 'index', intersect: false },
         animation: reducedMotion() ? false : { duration: 300 },
+        layout: { padding: { right: 90, top: 4 } },
         plugins: {
           legend: { display: false },
           tooltip: {
@@ -1019,6 +1073,13 @@ button,input,select{font:inherit;color:inherit}
     chart.data.datasets[0].label = state.v1.name;
     chart.data.datasets[1].label = state.v2.name;
     chart.options.scales.x.max = months;
+    // Място вдясно за етикетите на крайните стойности
+    // Room on the right for the end-value labels
+    const cx = chart.ctx;
+    cx.save(); cx.font = END_FONT;
+    const maxW = Math.max(cx.measureText(eur0(d.c1.total)).width, cx.measureText(eur0(d.c2.total)).width);
+    cx.restore();
+    chart.options.layout.padding.right = Math.ceil(maxW + 12 + END_OFFSET + 6);
     chart.update(animate && !reducedMotion() ? undefined : 'none');
   }
 
